@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dynamicstorage-videoprocessor
+  namespace: media
+  labels:
+    app: dynamicstorage-videoprocessor
+spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 25%
+  minReadySeconds: 30
+  selector:
+    matchLabels:
+      service: dynamicstorage-videoprocessor
+  template:
+    metadata:
+      labels:
+        app: dynamicstorage-videoprocessor
+        service: dynamicstorage-videoprocessor
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      priorityClassName: media-highest-priority-linux
+      #------------------------------------------------------
+      # setting pod DNS policies to enable faster DNS resolution
+      # https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy
+      dnsConfig:
+        options:
+          # use FQDN everywhere 
+          # any cluster local access from pods need full CNAME to resolve 
+          # short names will not resolve to internal cluster domains
+          - name: ndots
+            value: "2"
+          # dns resolver timeout and attempts
+          - name: timeout
+            value: "15"
+          - name: attempts
+            value: "3"
+          # use TCP to resolve DNS instad of using UDP (UDP is lossy and pods need to wait for timeout for lost packets)
+          - name: use-vc
+          # open new socket for retrying
+          - name: single-request-reopen
+      #------------------------------------------------------
+      volumes:
+        # # `name` here must match the name
+        # # specified in the volume mount
+        # - name: demo-configmap-dynamicstorage-videoprocessor-volume
+        #   configMap:
+        #     # `name` here must match the name
+        #     # specified in the ConfigMap's YAML
+        #     name: demo-configmap
+        - name: media-data-volume
+          persistentVolumeClaim:
+            claimName: media-azurefile # PersistentVolumeClaim name in aks_manifests\dynamicfs\k8s.yaml
+      terminationGracePeriodSeconds: 300 # This must be set to a value that is greater than the preStop hook wait time.
+      containers:
+        - name: dynamicstorage-videoprocessor
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sleep","180"]
+          image: chdemosharedacr.azurecr.io/media/chmediaservice:1.0
+          imagePullPolicy: Always
+          volumeMounts:
+            # - mountPath: /etc/config
+            #   name: demo-configmap-dynamicstorage-videoprocessor-volume
+            - mountPath: /media/data
+              name: media-data-volume
+          env:
+            - name: MEDIA_PATH
+              value: /media/data
+          resources:
+                limits:
+                  memory: 4Gi # the memory limit equals to the request!
+                  # no cpu limit! this is excluded on purpose
+                requests:
+                  memory: 4Gi
+                  cpu: "2"

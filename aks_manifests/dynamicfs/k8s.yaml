@@ -1,0 +1,31 @@
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: media-azurefile  
+provisioner: file.csi.azure.com
+reclaimPolicy: Delete
+allowVolumeExpansion: true
+mountOptions:
+ - dir_mode=0777
+ - file_mode=0777
+ - uid=0
+ - gid=0
+ - mfsymlinks
+ - cache=strict
+ - actimeo=30
+parameters:
+  skuName: Premium_LRS
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: media-azurefile
+  namespace: media
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: media-azurefile
+  resources:
+    requests:
+      storage: 100Gi
