@@ -7,7 +7,8 @@ terraform plan -var-file='env.tfvars' -out='my.tfplan'
 terraform apply my.tfplan
 
 If sh files gives not found issues. rename current files. create new setup.sh and videoprocessor.sh with same content.
-Then docker build works
+Then docker build works. To avoid this on windows run below command for git before cloning this repo.
+git config --global core.autocrlf false
 
 docker build --no-cache -t chmediaservice:dev --progress=plain -f Dockerfile .
 docker run -v c:/temp/videos:/media/data -e MEDIA_PATH='/media/data' --name chmediaservice chmediaservice:dev
