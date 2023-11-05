@@ -65,3 +65,9 @@ yq --input-format json -op '.destinationStorageAccount' 'messageContent.json'
 
 rm -f messageContent.json
 rm -f queueMessage.xml
+
+commandToRun=$(echo ffmpeg -i $assetId -vcodec libx264 -crf 28 -preset ultrafast -c:a copy -s 1280x720 $generatedDirName/"$assetNamePrefix"720p.mp4)
+
+echo $commandToRun
+
+$commandToRun  # to get command run
