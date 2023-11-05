@@ -1,6 +1,16 @@
-# echo "Updating all packages..."
-# apt-get update && apt-get upgrade -y
-# echo "Updating all packages completed."
+echo "Updating all packages..."
+apt-get update && apt-get upgrade -y
+echo "Updating all packages completed."
+
+echo "Setting up wget..."
+apt-get install wget
+echo "Setting up wget completed."
+
+echo "Setting up yq..."
+wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+chmod a+x /usr/local/bin/yq
+yq --version
+echo "Setting up yq completed."
 
 echo "Setting up Azure CLI..."
 curl -sL https://aka.ms/InstallAzureCLIDeb | bash
