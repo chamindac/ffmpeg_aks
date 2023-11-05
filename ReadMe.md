@@ -23,10 +23,20 @@ docker push chdemosharedacr.azurecr.io/media/chmediaservice:1.0
 {
     "assetContianerName": "originals-de1885b94150-d6f6b9f9-f2eb-42cf-96c5-fe0be098fef3",
     "assetId":  "bb5ab2dd-f89c-4689-976b-0de2fce614ec",
-    "assetNamePrefix": "walk_",
     "originalAssetBlobName": "original",
     "sourceStorageAccount": "cheuw001assetsstcool",
-    "destinationStorageAccount": "cheuw001assetssthot"
+    "destinationStorageAccount": "cheuw001assetssthot",
+    "commandCount": 2,
+    "commandArgs": [
+        {
+        "inFileOptions": "-vf fps=1/4",
+        "outFileName": "walk_%04d.png"
+        },
+        {
+        "inFileOptions": "-vcodec libx264 -crf 28 -preset ultrafast -c:a copy -s 1280x720",
+        "outFileName": "walk_720p.mp4"
+        }
+    ]
 }
 
 # local test
@@ -39,7 +49,7 @@ ls -l
 expiry=$(date -u -d "120 minutes" '+%Y-%m-%dT%H:%MZ')
 echo "SAS key expiry utc" $expiry
 
-az storage queue generate-sas --account-key 6PZA4RP00tnVKLy+gmbbJ5FlagOtb3Ip2IptOQ18vvKISwFwJfgSBu/ub29OoZdZxuYcPLcv7r24+ASthMRN+g== --account-name chvideodeveuw001queuest -n demovideoqueue --permissions apru --expiry $expiry --https-only
+az storage queue generate-sas --account-key accKey --account-name chvideodeveuw001queuest -n demovideoqueue --permissions apru --expiry $expiry --https-only
 
 curl -i -X GET -H "x-ms-version: 2020-04-08" "https://chvideodeveuw001queuest.queue.core.windows.net/demovideoqueue/messages?peekonly=true&SaSKey"
 
