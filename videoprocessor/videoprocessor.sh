@@ -60,5 +60,13 @@ do
         echo "media service is running for $logDate"
     fi
 
+    # This is for loop through commands when a message is received
+    # commandCount=10
+
+    # for (( i=0; i<$commandCount; i++ ))
+    # do 
+    #     echo "Welcome $i times"
+    # done
+
     sleep 60
 done

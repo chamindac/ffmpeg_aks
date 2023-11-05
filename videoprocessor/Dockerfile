@@ -10,4 +10,4 @@ RUN chmod +x ./videoprocessor.sh
 RUN ./setup.sh
 RUN rm -f ./setup.sh
 
-ENTRYPOINT ["sh", "videoprocessor.sh" ]
+ENTRYPOINT ["bash", "videoprocessor.sh" ]
