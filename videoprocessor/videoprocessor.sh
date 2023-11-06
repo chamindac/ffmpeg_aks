@@ -30,35 +30,79 @@ ls -l
 
 #ffmpeg -i "https://cheuw001assetsstcool.blob.core.windows.net/originals-de1885b94150-d6f6b9f9-f2eb-42cf-96c5-fe0be098fef3/bb5ab2dd-f89c-4689-976b-0de2fce614ec/original?se=2023-10-31T16%3A13Z&sp=r&spr=https&sv=2022-11-02&sr=c&sig=BmgfTMe1MzmFP2Nh1zkYHGhnHAceyW6fXG0csHX%2Bqd4%3D" -vf fps=1/4 generated/walk_%04d.png
 
-assetContianerName="originals-de1885b94150-d6f6b9f9-f2eb-42cf-96c5-fe0be098fef3"
-assetId="bb5ab2dd-f89c-4689-976b-0de2fce614ec"
-assetNamePrefix="walk_"
-originalAssetBlobName="original"
-sourceStorageAccount="cheuw001assetsstcool"
-destinationStorageAccount="cheuw001assetssthot"
-generatedDirName="generated"
+# assetContianerName="originals-de1885b94150-d6f6b9f9-f2eb-42cf-96c5-fe0be098fef3"
+# assetId="bb5ab2dd-f89c-4689-976b-0de2fce614ec"
+# assetNamePrefix="walk_"
+# originalAssetBlobName="original"
+# sourceStorageAccount="cheuw001assetsstcool"
+# destinationStorageAccount="cheuw001assetssthot"
+# generatedDirName="generated"
 
-mkdir $assetId
-cd $assetId
-mkdir $generatedDirName
-az storage blob download --auth-mode login --max-connections 5 --blob-url https://$sourceStorageAccount.blob.core.windows.net/$assetContianerName/$assetId/$originalAssetBlobName -f $assetId
-ffmpeg -i $assetId -vf fps=1/4 $generatedDirName/$assetNamePrefix%04d.png
-ffmpeg -i $assetId -vcodec libx264 -crf 28 -preset ultrafast -c:a copy -s 1280x720 $generatedDirName/"$assetNamePrefix"720p.mp4
-az storage container create --auth-mode login --account-name $destinationStorageAccount --name video-$assetId
-az storage blob upload-batch --auth-mode login --max-connections 5 --overwrite true --account-name $destinationStorageAccount -s $generatedDirName -d video-$assetId
-cd ..
-rm -rf $assetId
+# mkdir $assetId
+# cd $assetId
+# mkdir $generatedDirName
+# az storage blob download --auth-mode login --max-connections 5 --blob-url https://$sourceStorageAccount.blob.core.windows.net/$assetContianerName/$assetId/$originalAssetBlobName -f $assetId
+# ffmpeg -i $assetId -vf fps=1/4 $generatedDirName/$assetNamePrefix%04d.png
+# ffmpeg -i $assetId -vcodec libx264 -crf 28 -preset ultrafast -c:a copy -s 1280x720 $generatedDirName/"$assetNamePrefix"720p.mp4
+# az storage container create --auth-mode login --account-name $destinationStorageAccount --name video-$assetId
+# az storage blob upload-batch --auth-mode login --max-connections 5 --overwrite true --account-name $destinationStorageAccount -s $generatedDirName -d video-$assetId
+# cd ..
+# rm -rf $assetId
 
+queueSaSKey=""
 
 while :
 do
     currentDate=$(date '+%Y-%m-%d')
+    
 
     if [ "$logDate" != "$currentDate" ]
     then
         logDate=$currentDate
-        echo "media service is running for $logDate"
+        echo "============================================"
+        echo "ffmpeg service is running for $logDate"
+
+        # Setting up queue storage SaS key - valid for 48 hours (Resets in every day)
+        queueStorageAccKey=$(az storage account keys list -g ch-video-dev-euw-001-rg -n chvideodeveuw001queuest --query [0].value -o tsv)
+        expirySaSKey=$(date -u -d "48 hours" '+%Y-%m-%dT%H:%MZ')
+        queueSaSKey=$(az storage queue generate-sas --account-key $queueStorageAccKey --account-name chvideodeveuw001queuest -n demovideoqueue --permissions apru --expiry $expirySaSKey --https-only -o tsv)
+
+        echo "Genrated SaS Key for queue."
+        echo "============================================"
     fi
+
+    queueMessage=$(curl -s -X GET -H "x-ms-version: 2020-04-08" "https://chvideodeveuw001queuest.queue.core.windows.net/demovideoqueue/messages?visibilitytimeout=300&$queueSaSKey")
+
+    messageFileId=$(uuidgen)
+    echo $queueMessage > "$messageFileId.xml"
+    receivedMessageCount=$(yq --input-format xml -op ".QueueMessagesList | length" "$messageFileId.xml")
+
+    if [ $receivedMessageCount -gt 0 ]
+    then
+        messageId=$(yq --input-format xml -op ".QueueMessagesList.QueueMessage.MessageId" "$messageFileId.xml")
+        messagePopReceipt=$(yq --input-format xml -op ".QueueMessagesList.QueueMessage.PopReceipt" "$messageFileId.xml")
+        messageDequeueCount=$(yq --input-format xml -op ".QueueMessagesList.QueueMessage.DequeueCount" "$messageFileId.xml")
+        messageDequeueCount=$(yq --input-format xml -op ".QueueMessagesList.QueueMessage.DequeueCount" "$messageFileId.xml")
+        messageContent=$(yq --input-format xml -op ".QueueMessagesList.QueueMessage.MessageText" "$messageFileId.xml")
+
+        echo $messageContent > $messageFileId.json
+
+        echo "Received below message from queue"
+        echo "--------------------------------------------"
+        echo $messageContent
+        echo "--------------------------------------------"
+
+        
+
+
+    else
+        echo "No messages in the queue." # later comment this to prevent excessive logs.
+        rm -f $messageFileId.xml
+    fi
+    
+
+
+
 
     # This is for loop through commands when a message is received
     # commandCount=10

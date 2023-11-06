@@ -21,6 +21,7 @@ docker login chdemosharedacr.azurecr.io -u spnappid -p spnapppwd
 docker push chdemosharedacr.azurecr.io/media/chmediaservice:1.0
 
 # Test message for Q
+For this you need an asset (video) uploaded in cheuw001assetsstcool with below specified blob container having a folder named with assetId. The asset name set as original.
 
 {
     "assetContianerName": "originals-de1885b94150-d6f6b9f9-f2eb-42cf-96c5-fe0be098fef3",
@@ -28,7 +29,6 @@ docker push chdemosharedacr.azurecr.io/media/chmediaservice:1.0
     "originalAssetBlobName": "original",
     "sourceStorageAccount": "cheuw001assetsstcool",
     "destinationStorageAccount": "cheuw001assetssthot",
-    "commandCount": 2,
     "commandArgs": [
         {
         "inFileOptions": "-vf fps=1/4",
@@ -48,38 +48,86 @@ winpty docker exec -it chmediaservice sh
 cd /media/data
 ls -l
 
-expiry=$(date -u -d "120 minutes" '+%Y-%m-%dT%H:%MZ')
-echo "SAS key expiry utc" $expiry
 
-az storage queue generate-sas --account-key accKey --account-name chvideodeveuw001queuest -n demovideoqueue --permissions apru --expiry $expiry --https-only
+queueStorageAccKey=$(az storage account keys list -g ch-video-dev-euw-001-rg -n chvideodeveuw001queuest --query [0].value -o tsv)
 
-curl -i -X GET -H "x-ms-version: 2020-04-08" "https://chvideodeveuw001queuest.queue.core.windows.net/demovideoqueue/messages?peekonly=true&SaSKey"
+echo $queueStorageAccKey
 
-queueMessage=$(curl -s -X GET -H "x-ms-version: 2020-04-08" "https://chvideodeveuw001queuest.queue.core.windows.net/demovideoqueue/messages?peekonly=true&SaSKey")
+# Setting the expiry for SaS key for 48 hours to ensure it is available for the day (each day processor will create a new SaS key).
+expirySaSKey=$(date -u -d "120 minutes" '+%Y-%m-%dT%H:%MZ')
+echo "SAS key expiry utc" $expirySaSKey
+
+queueSaSKey=$(az storage queue generate-sas --account-key $queueStorageAccKey --account-name chvideodeveuw001queuest -n demovideoqueue --permissions apru --expiry $expirySaSKey --https-only -o tsv)
+
+echo $queueSaSKey
+
+curl -i -X GET -H "x-ms-version: 2020-04-08" "https://chvideodeveuw001queuest.queue.core.windows.net/demovideoqueue/messages?peekonly=true&$queueSaSKey"
+
+queueMessage=$(curl -s -X GET -H "x-ms-version: 2020-04-08" "https://chvideodeveuw001queuest.queue.core.windows.net/demovideoqueue/messages?peekonly=true&$queueSaSKey")
+queueMessage=$(curl -s -X GET -H "x-ms-version: 2020-04-08" "https://chvideodeveuw001queuest.queue.core.windows.net/demovideoqueue/messages?visibilitytimeout=300&$queueSaSKey")
+
+messageFileId=$(uuidgen)
+echo $messageFileId
 
 echo $queueMessage
-echo $queueMessage > queueMessage.xml
-cat queueMessage.xml
+echo $queueMessage > "$messageFileId.xml"
+cat "$messageFileId.xml"
 
-yq --input-format xml -op .QueueMessagesList.QueueMessage.MessageId queueMessage.xml
+receivedMessageCount=$(yq --input-format xml -op ".QueueMessagesList | length" "$messageFileId.xml")
+echo $receivedMessageCount
 
-messageContent=$(yq --input-format xml -op .QueueMessagesList.QueueMessage.MessageText queueMessage.xml)
+messageId=$(yq --input-format xml -op ".QueueMessagesList.QueueMessage.MessageId" "$messageFileId.xml")
+messagePopReceipt=$(yq --input-format xml -op ".QueueMessagesList.QueueMessage.PopReceipt" "$messageFileId.xml")
 
-echo $messageContent > messageContent.json
+echo $messagePopReceipt
+echo -n $messagePopReceipt | jq -sRr @uri
 
-yq --input-format json -op .assetContianerName messageContent.json
-yq --input-format json -op .assetId messageContent.json
-yq --input-format json -op .originalAssetBlobName messageContent.json
-yq --input-format json -op .sourceStorageAccount messageContent.json
-yq --input-format json -op .destinationStorageAccount messageContent.json
-yq --input-format json -op .commandCount messageContent.json
+encodedMessagePopReceipt=$(echo -n $messagePopReceipt | jq -sRr @uri)
+echo $encodedMessagePopReceipt
 
-assetContianerName=$(yq --input-format json -op .assetContianerName messageContent.json)
-assetId=$(yq --input-format json -op .assetId messageContent.json)
-originalAssetBlobName=$(yq --input-format json -op .originalAssetBlobName messageContent.json)
-sourceStorageAccount=$(yq --input-format json -op .sourceStorageAccount messageContent.json)
-destinationStorageAccount=$(yq --input-format json -op .destinationStorageAccount messageContent.json)
-commandCount=$(yq --input-format json -op .commandCount messageContent.json)
+encodeQueueSaSKey=$(echo -n $queueSaSKey | jq -sRr @uri)
+
+yq --input-format xml -op ".QueueMessagesList.QueueMessage.MessageId" "$messageFileId.xml"
+
+curl -i -X DELETE -H "x-ms-version: 2020-04-08" "https://chvideodeveuw001queuest.queue.core.windows.net/demovideoqueue/messages/$messageId?popreceipt=$messagePopReceipt&$queueSaSKey"
+
+### reset visibility
+curl -i -X PUT -H "x-ms-version: 2020-04-08" -H "Content-Length: 0" "https://chvideodeveuw001queuest.queue.core.windows.net/demovideoqueue/messages/$messageId?popreceipt=$encodedMessagePopReceipt&visibilitytimeout=1&$queueSaSKey"
+
+
+yq --input-format xml -op ".QueueMessagesList.QueueMessage.MessageText" "$messageFileId.xml"
+
+messageContent=$(yq --input-format xml -op ".QueueMessagesList.QueueMessage.MessageText" "$messageFileId.xml")
+
+echo $messageContent > $messageFileId.json
+
+jq -r ".assetContianerName" "$messageFileId.json"
+jq -r ".assetId" "$messageFileId.json"
+jq -r ".originalAssetBlobName" "$messageFileId.json"
+jq -r ".sourceStorageAccount" "$messageFileId.json"
+jq -r ".destinationStorageAccount" "$messageFileId.json"
+
+jq -r ".commandArgs | length" "$messageFileId.json"
+jq -r '.commandArgs[0].inFileOptions' "$messageFileId.json"
+
+i=0
+jq -r ".commandArgs[$i].inFileOptions" "$messageFileId.json"
+
+
+### below with yq works as well
+yq --input-format json -op ".assetId" "$messageFileId.json"
+yq --input-format json -op ".commandArgs | length" "$messageFileId.json"
+yq --input-format json -op ".commandArgs.$i.inFileOptions" "$messageFileId.json"
+
+### getting message contents to variables
+assetContianerName=$(jq -r ".assetContianerName" "$messageFileId.json")
+assetId=$(jq -r ".assetId" "$messageFileId.json")
+originalAssetBlobName=$(jq -r ".originalAssetBlobName" "$messageFileId.json")
+sourceStorageAccount=$(jq -r ".sourceStorageAccount" "$messageFileId.json")
+destinationStorageAccount=$(jq -r ".destinationStorageAccount" "$messageFileId.json")
+commandCount=$(jq -r ".commandArgs | length" "$messageFileId.json")
+
+echo $commandCount
 
 generatedDirName="generated"
 mkdir $assetId
@@ -93,9 +141,9 @@ echo $commandCount
 # for loop is in videoprocessor.sh
 i=0
 
-inFileOptions=$(yq --input-format json -op .commandArgs.$i.inFileOptions ../messageContent.json)
+inFileOptions=$(yq --input-format json -op .commandArgs.$i.inFileOptions ../$messageFileId.json)
 
-outFileName=$(yq --input-format json -op .commandArgs.$i.outFileName ../messageContent.json)
+outFileName=$(yq --input-format json -op .commandArgs.$i.outFileName ../$messageFileId.json)
 
 ffmpeg -i $assetId $inFileOptions $generatedDirName/$outFileName
 
@@ -106,6 +154,6 @@ az storage blob upload-batch --auth-mode login --max-connections 5 --overwrite t
 cd ..
 rm -rf $assetId
 
-rm -f messageContent.json
-rm -f queueMessage.xml
+rm -f $messageFileId.json
+rm -f $messageFileId.xml
 
