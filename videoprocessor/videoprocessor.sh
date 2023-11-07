@@ -165,8 +165,8 @@ do
         
         cd ..
         rm -rf $assetId
-    else
-        #echo "No messages in the queue." # later comment this to prevent excessive logs.
+    # else
+    #     echo "No messages in the queue." # later comment this to prevent excessive logs.
     fi
     sleep 1
 done
