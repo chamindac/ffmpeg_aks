@@ -159,3 +159,8 @@ rm -f $messageFileId.xml
 start=$(date '+%s')
 end=$(date '+%s')
 elapsed=$(($end - $start))
+
+
+$(($(stat --format=%s original)/1048576))
+
+$(du -h original)

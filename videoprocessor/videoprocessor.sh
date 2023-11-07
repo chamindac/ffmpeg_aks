@@ -111,7 +111,9 @@ do
         { # try
             downloadStarted=$(date '+%s')
             az storage blob download --auth-mode login --max-connections 5 --blob-url https://$sourceStorageAccount.blob.core.windows.net/$assetContianerName/$assetId/$originalAssetBlobName -f $assetId
-       
+            
+            assetSize=$(du -h)
+
             processStarted=$(date '+%s')
             for (( i=0; i<$commandCount; i++ ))
             do 
@@ -142,11 +144,12 @@ do
             echo "Successfully processed in $messageDequeueCount attempt(s). Removing message from the queue..."
             curl -i -X DELETE -H "x-ms-version: 2020-04-08" "https://chvideodeveuw001queuest.queue.core.windows.net/demovideoqueue/messages/$messageId?popreceipt=$encodedMessagePopReceipt&$queueSaSKey"
             echo "Message removed from the queue."
+            echo "Asset size: $assetSize"
             echo "Total time: $totalElapsed"
             echo "Downoad time: $downloadElapsed"
             echo "Process time: $processElapsed"
             echo "Upload time: $uploadElapsed"
-            echo -e "Total time: $totalElapsed \nDownoad time: $downloadElapsed \nProcess time: $processElapsed \nUpload time: $uploadElapsed" > "$generatedDirName/processtime.txt"
+            echo -e "Asset size: $assetSize \nTotal time: $totalElapsed \nDownoad time: $downloadElapsed \nProcess time: $processElapsed \nUpload time: $uploadElapsed" > "$generatedDirName/processtime.txt"
             echo "--------------------------------------------"
 
         } || { # catch
