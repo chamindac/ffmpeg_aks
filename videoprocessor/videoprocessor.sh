@@ -106,15 +106,15 @@ do
 
         mkdir $assetId
         cd $assetId
-        mkdir $generatedDirName
-
+        
         { # try
             downloadStarted=$(date '+%s')
             az storage blob download --auth-mode login --max-connections 5 --blob-url https://$sourceStorageAccount.blob.core.windows.net/$assetContianerName/$assetId/$originalAssetBlobName -f $assetId
             
             assetSize=$(du -h)
-
+            mkdir $generatedDirName
             processStarted=$(date '+%s')
+            
             for (( i=0; i<$commandCount; i++ ))
             do 
                 inFileOptions=$(yq --input-format json -op .commandArgs.$i.inFileOptions ../$messageFileId.json)
