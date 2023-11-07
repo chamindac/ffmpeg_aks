@@ -16,9 +16,9 @@ docker run -v c:/temp/videos:/media/data -e MEDIA_PATH='/media/data' --name chme
 
 
 
-docker tag chmediaservice:dev chdemosharedacr.azurecr.io/media/chmediaservice:1.0
+docker tag chmediaservice:dev chdemosharedacr.azurecr.io/media/chmediaservice:1.1
 docker login chdemosharedacr.azurecr.io -u spnappid -p spnapppwd
-docker push chdemosharedacr.azurecr.io/media/chmediaservice:1.0
+docker push chdemosharedacr.azurecr.io/media/chmediaservice:1.1
 
 # Test message for Q
 For this you need an asset (video) uploaded in cheuw001assetsstcool with below specified blob container having a folder named with assetId. The asset name set as original.
