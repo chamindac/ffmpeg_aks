@@ -155,3 +155,7 @@ rm -rf $assetId
 rm -f $messageFileId.json
 rm -f $messageFileId.xml
 
+
+start=$(date '+%s')
+end=$(date '+%s')
+elapsed=$(($end - $start))

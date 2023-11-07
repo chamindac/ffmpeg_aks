@@ -73,6 +73,7 @@ do
         echo "============================================"
     fi
 
+    started=$(date '+%s')
     queueMessage=$(curl -s -X GET -H "x-ms-version: 2020-04-08" "https://chvideodeveuw001queuest.queue.core.windows.net/demovideoqueue/messages?visibilitytimeout=$maxProcessWaitTime&$queueSaSKey")
 
     messageFileId=$(uuidgen)
@@ -108,9 +109,10 @@ do
         mkdir $generatedDirName
 
         { # try
-
+            downloadStarted=$(date '+%s')
             az storage blob download --auth-mode login --max-connections 5 --blob-url https://$sourceStorageAccount.blob.core.windows.net/$assetContianerName/$assetId/$originalAssetBlobName -f $assetId
        
+            processStarted=$(date '+%s')
             for (( i=0; i<$commandCount; i++ ))
             do 
                 inFileOptions=$(yq --input-format json -op .commandArgs.$i.inFileOptions ../$messageFileId.json)
@@ -121,6 +123,8 @@ do
                 ffmpeg -i $assetId $inFileOptions $generatedDirName/$outFileName
                 echo "--------------------------------------------"
             done
+
+            uploadStarted=$(date '+%s')
             echo "--------------------------------------------"
             echo "Uploading generated asste files..."
             az storage container create --auth-mode login --account-name $destinationStorageAccount --name video-$assetId
@@ -128,10 +132,21 @@ do
             echo "Uploading generated asste files completed."
             echo "--------------------------------------------"
 
+            ended=$(date '+%s')
+            totalElapsed=$(($ended - $started))
+            uploadElapsed=$(($ended - $uploadStarted))
+            processElapsed=$(($ended - $processStarted))
+            downloadElapsed=$(($ended - $downloadStarted))
+
             echo "--------------------------------------------"
             echo "Successfully processed in $messageDequeueCount attempt(s). Removing message from the queue..."
             curl -i -X DELETE -H "x-ms-version: 2020-04-08" "https://chvideodeveuw001queuest.queue.core.windows.net/demovideoqueue/messages/$messageId?popreceipt=$encodedMessagePopReceipt&$queueSaSKey"
             echo "Message removed from the queue."
+            echo "Total time: $totalElapsed"
+            echo "Downoad time: $downloadElapsed"
+            echo "Process time: $processElapsed"
+            echo "Upload time: $uploadElapsed"
+            echo -e "Total time: $totalElapsed \nDownoad time: $downloadElapsed \nProcess time: $processElapsed \nUpload time: $uploadElapsed" > "$generatedDirName/processtime.txt"
             echo "--------------------------------------------"
 
         } || { # catch
