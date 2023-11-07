@@ -155,8 +155,8 @@ do
         rm -f $messageFileId.json
         rm -f $messageFileId.xml
     else
-        echo "No messages in the queue." # later comment this to prevent excessive logs.
+        # echo "No messages in the queue." # later comment this to prevent excessive logs.
         rm -f $messageFileId.xml
     fi
-    sleep 60
+    sleep 1
 done
