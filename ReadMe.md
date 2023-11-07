@@ -31,11 +31,11 @@ For this you need an asset (video) uploaded in cheuw001assetsstcool with below s
     "destinationStorageAccount": "cheuw001assetssthot",
     "commandArgs": [
         {
-        "inFileOptions": "-vf fps=1/4",
+        "outFileOptions": "-vf fps=1/4",
         "outFileName": "walk_%04d.png"
         },
         {
-        "inFileOptions": "-vcodec libx264 -crf 28 -preset ultrafast -c:a copy -s 1280x720",
+        "outFileOptions": "-vcodec libx264 -crf 28 -preset ultrafast -c:a copy -s 1280x720",
         "outFileName": "walk_720p.mp4"
         }
     ]
@@ -106,16 +106,16 @@ jq -r ".sourceStorageAccount" "$messageFileId.json"
 jq -r ".destinationStorageAccount" "$messageFileId.json"
 
 jq -r ".commandArgs | length" "$messageFileId.json"
-jq -r '.commandArgs[0].inFileOptions' "$messageFileId.json"
+jq -r '.commandArgs[0].outFileOptions' "$messageFileId.json"
 
 i=0
-jq -r ".commandArgs[$i].inFileOptions" "$messageFileId.json"
+jq -r ".commandArgs[$i].outFileOptions" "$messageFileId.json"
 
 
 ### below with yq works as well
 yq --input-format json -op ".assetId" "$messageFileId.json"
 yq --input-format json -op ".commandArgs | length" "$messageFileId.json"
-yq --input-format json -op ".commandArgs.$i.inFileOptions" "$messageFileId.json"
+yq --input-format json -op ".commandArgs.$i.outFileOptions" "$messageFileId.json"
 
 ### getting message contents to variables
 assetContianerName=$(jq -r ".assetContianerName" "$messageFileId.json")
@@ -139,11 +139,11 @@ echo $commandCount
 # for loop is in videoprocessor.sh
 i=0
 
-inFileOptions=$(yq --input-format json -op .commandArgs.$i.inFileOptions ../$messageFileId.json)
+outFileOptions=$(yq --input-format json -op .commandArgs.$i.outFileOptions ../$messageFileId.json)
 
 outFileName=$(yq --input-format json -op .commandArgs.$i.outFileName ../$messageFileId.json)
 
-ffmpeg -i $assetId $inFileOptions $generatedDirName/$outFileName
+ffmpeg -i $assetId $outFileOptions $generatedDirName/$outFileName
 
 # then i=1 and repeat above
 

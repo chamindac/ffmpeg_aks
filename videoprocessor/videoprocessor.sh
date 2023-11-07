@@ -117,12 +117,12 @@ do
             
             for (( i=0; i<$commandCount; i++ ))
             do 
-                inFileOptions=$(yq --input-format json -op .commandArgs.$i.inFileOptions ../$messageFileId.json)
+                outFileOptions=$(yq --input-format json -op .commandArgs.$i.outFileOptions ../$messageFileId.json)
                 outFileName=$(yq --input-format json -op .commandArgs.$i.outFileName ../$messageFileId.json)
 
                 echo "--------------------------------------------"
-                echo "Processing... ffmpeg -i $assetId $inFileOptions $generatedDirName/$outFileName"
-                ffmpeg -i $assetId $inFileOptions $generatedDirName/$outFileName
+                echo "Processing... ffmpeg -i $assetId $outFileOptions $generatedDirName/$outFileName"
+                ffmpeg -i $assetId $outFileOptions $generatedDirName/$outFileName
                 echo "--------------------------------------------"
             done
 

@@ -7,11 +7,11 @@
         "destinationStorageAccount": "cheuw001assetssthot",
         "commandArgs": [
             {
-            "inFileOptions": "-vf fps=1/4",
+            "outFileOptions": "-vf fps=1/4",
             "outFileName": "walk_%04d.png"
             },
             {
-            "inFileOptions": "-vcodec libx264 -crf 28 -preset ultrafast -c:a copy -s 1280x720",
+            "outFileOptions": "-vcodec libx264 -crf 28 -preset ultrafast -c:a copy -s 1280x720",
             "outFileName": "walk_720p.mp4"
             }
         ]
@@ -24,11 +24,11 @@
         "destinationStorageAccount": "cheuw001assetssthot",
         "commandArgs": [
             {
-            "inFileOptions": "-vf fps=1/2",
+            "outFileOptions": "-vf fps=1/2",
             "outFileName": "beach_%04d.png"
             },
             {
-            "inFileOptions": "-vcodec libx264 -crf 28 -preset ultrafast -c:a copy -s 720x1280",
+            "outFileOptions": "-vcodec libx264 -crf 28 -preset ultrafast -c:a copy -s 720x1280",
             "outFileName": "beach_720p.mp4"
             }
         ]
@@ -41,11 +41,11 @@
         "destinationStorageAccount": "cheuw001assetssthot",
         "commandArgs": [
             {
-            "inFileOptions": "-vf fps=1/4",
+            "outFileOptions": "-vf fps=1/4",
             "outFileName": "friendseating_%04d.png"
             },
             {
-            "inFileOptions": "-vcodec libx264 -crf 28 -preset ultrafast -c:a copy -s 1280x720",
+            "outFileOptions": "-vcodec libx264 -crf 28 -preset ultrafast -c:a copy -s 1280x720",
             "outFileName": "friendseating_720p.mp4"
             }
         ]
@@ -58,11 +58,11 @@
         "destinationStorageAccount": "cheuw001assetssthot",
         "commandArgs": [
             {
-            "inFileOptions": "-vf fps=1/4",
+            "outFileOptions": "-vf fps=1/4",
             "outFileName": "boatnewyork_%04d.png"
             },
             {
-            "inFileOptions": "-vcodec libx264 -crf 28 -preset ultrafast -c:a copy -s 1280x720",
+            "outFileOptions": "-vcodec libx264 -crf 28 -preset ultrafast -c:a copy -s 1280x720",
             "outFileName": "boatnewyork_720p.mp4"
             }
         ]
@@ -75,12 +75,29 @@
         "destinationStorageAccount": "cheuw001assetssthot",
         "commandArgs": [
             {
-            "inFileOptions": "-vf fps=1/2",
+            "outFileOptions": "-vf fps=1/2",
             "outFileName": "waterstream_%04d.png"
             },
             {
-            "inFileOptions": "-vcodec libx264 -crf 28 -preset ultrafast -c:a copy -s 720x1280",
+            "outFileOptions": "-vcodec libx264 -crf 28 -preset ultrafast -c:a copy -s 720x1280",
             "outFileName": "waterstream_720p.mp4"
+            }
+        ]
+    },
+    {
+        "assetContianerName": "originals-de1885b94150-d6f6b9f9-f2eb-42cf-96c5-fe0be098fef3",
+        "assetId": "40f88882-73fd-4785-b662-9c87c2876814",
+        "originalAssetBlobName": "original",
+        "sourceStorageAccount": "cheuw001assetsstcool",
+        "destinationStorageAccount": "cheuw001assetssthot",
+        "commandArgs": [
+            {
+            "outFileOptions": "-vf fps=1/420",
+            "outFileName": "strangerthings_%04d.png"
+            },
+            {
+            "outFileOptions": "-vcodec libx264 -crf 28 -preset ultrafast -c:a copy -s 1280x720",
+            "outFileName": "strangerthings_720p.mp4"
             }
         ]
     }
