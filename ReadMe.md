@@ -85,11 +85,9 @@ echo -n $messagePopReceipt | jq -sRr @uri
 encodedMessagePopReceipt=$(echo -n $messagePopReceipt | jq -sRr @uri)
 echo $encodedMessagePopReceipt
 
-encodeQueueSaSKey=$(echo -n $queueSaSKey | jq -sRr @uri)
-
 yq --input-format xml -op ".QueueMessagesList.QueueMessage.MessageId" "$messageFileId.xml"
 
-curl -i -X DELETE -H "x-ms-version: 2020-04-08" "https://chvideodeveuw001queuest.queue.core.windows.net/demovideoqueue/messages/$messageId?popreceipt=$messagePopReceipt&$queueSaSKey"
+curl -i -X DELETE -H "x-ms-version: 2020-04-08" "https://chvideodeveuw001queuest.queue.core.windows.net/demovideoqueue/messages/$messageId?popreceipt=$encodedMessagePopReceipt&$queueSaSKey"
 
 ### reset visibility
 curl -i -X PUT -H "x-ms-version: 2020-04-08" -H "Content-Length: 0" "https://chvideodeveuw001queuest.queue.core.windows.net/demovideoqueue/messages/$messageId?popreceipt=$encodedMessagePopReceipt&visibilitytimeout=1&$queueSaSKey"

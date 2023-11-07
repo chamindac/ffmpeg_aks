@@ -50,6 +50,8 @@ ls -l
 # rm -rf $assetId
 
 queueSaSKey=""
+generatedDirName="generated"
+maxProcessWaitTime=14400
 
 while :
 do
@@ -71,7 +73,7 @@ do
         echo "============================================"
     fi
 
-    queueMessage=$(curl -s -X GET -H "x-ms-version: 2020-04-08" "https://chvideodeveuw001queuest.queue.core.windows.net/demovideoqueue/messages?visibilitytimeout=300&$queueSaSKey")
+    queueMessage=$(curl -s -X GET -H "x-ms-version: 2020-04-08" "https://chvideodeveuw001queuest.queue.core.windows.net/demovideoqueue/messages?visibilitytimeout=$maxProcessWaitTime&$queueSaSKey")
 
     messageFileId=$(uuidgen)
     echo $queueMessage > "$messageFileId.xml"
@@ -82,8 +84,10 @@ do
         messageId=$(yq --input-format xml -op ".QueueMessagesList.QueueMessage.MessageId" "$messageFileId.xml")
         messagePopReceipt=$(yq --input-format xml -op ".QueueMessagesList.QueueMessage.PopReceipt" "$messageFileId.xml")
         messageDequeueCount=$(yq --input-format xml -op ".QueueMessagesList.QueueMessage.DequeueCount" "$messageFileId.xml")
-        messageDequeueCount=$(yq --input-format xml -op ".QueueMessagesList.QueueMessage.DequeueCount" "$messageFileId.xml")
         messageContent=$(yq --input-format xml -op ".QueueMessagesList.QueueMessage.MessageText" "$messageFileId.xml")
+
+        # Pop receipt must be encoded to enable passing it via querystring
+        encodedMessagePopReceipt=$(echo -n $messagePopReceipt | jq -sRr @uri)
 
         echo $messageContent > $messageFileId.json
 
@@ -92,25 +96,67 @@ do
         echo $messageContent
         echo "--------------------------------------------"
 
+        assetContianerName=$(jq -r ".assetContianerName" "$messageFileId.json")
+        assetId=$(jq -r ".assetId" "$messageFileId.json")
+        originalAssetBlobName=$(jq -r ".originalAssetBlobName" "$messageFileId.json")
+        sourceStorageAccount=$(jq -r ".sourceStorageAccount" "$messageFileId.json")
+        destinationStorageAccount=$(jq -r ".destinationStorageAccount" "$messageFileId.json")
+        commandCount=$(jq -r ".commandArgs | length" "$messageFileId.json")
+
+        mkdir $assetId
+        cd $assetId
+        mkdir $generatedDirName
+
+        { # try
+
+            az storage blob download --auth-mode login --max-connections 5 --blob-url https://$sourceStorageAccount.blob.core.windows.net/$assetContianerName/$assetId/$originalAssetBlobName -f $assetId
+       
+            for (( i=0; i<$commandCount; i++ ))
+            do 
+                inFileOptions=$(yq --input-format json -op .commandArgs.$i.inFileOptions ../$messageFileId.json)
+                outFileName=$(yq --input-format json -op .commandArgs.$i.outFileName ../$messageFileId.json)
+
+                echo "--------------------------------------------"
+                echo "Processing... ffmpeg -i $assetId $inFileOptions $generatedDirName/$outFileName"
+                ffmpeg -i $assetId $inFileOptions $generatedDirName/$outFileName
+                echo "--------------------------------------------"
+            done
+            echo "--------------------------------------------"
+            echo "Uploading generated asste files..."
+            az storage container create --auth-mode login --account-name $destinationStorageAccount --name video-$assetId
+            az storage blob upload-batch --auth-mode login --max-connections 5 --overwrite true --account-name $destinationStorageAccount -s $generatedDirName -d video-$assetId
+            echo "Uploading generated asste files completed."
+            echo "--------------------------------------------"
+
+            echo "--------------------------------------------"
+            echo "Successfully processed in $messageDequeueCount attempt(s). Removing message from the queue..."
+            curl -i -X DELETE -H "x-ms-version: 2020-04-08" "https://chvideodeveuw001queuest.queue.core.windows.net/demovideoqueue/messages/$messageId?popreceipt=$encodedMessagePopReceipt&$queueSaSKey"
+            echo "Message removed from the queue."
+            echo "--------------------------------------------"
+
+        } || { # catch
+            if [ $messageDequeueCount -ge 3 ] # 3 attempts made to process
+            then
+                echo "--------------------------------------------"
+                echo "Failed to process in 3 attempts. Removing message from the queue..."
+                curl -i -X DELETE -H "x-ms-version: 2020-04-08" "https://chvideodeveuw001queuest.queue.core.windows.net/demovideoqueue/messages/$messageId?popreceipt=$encodedMessagePopReceipt&$queueSaSKey"
+                echo "Message removed from the queue."
+                echo "--------------------------------------------"
+            else
+                echo "Failed to process in $messageDequeueCount attempt. Adding message back to the queue..."
+                curl -i -X PUT -H "x-ms-version: 2020-04-08" -H "Content-Length: 0" "https://chvideodeveuw001queuest.queue.core.windows.net/demovideoqueue/messages/$messageId?popreceipt=$encodedMessagePopReceipt&visibilitytimeout=1&$queueSaSKey"
+                echo "Message added to the queue."
+                echo "--------------------------------------------"
+            fi
+        }
         
-
-
+        cd ..
+        rm -rf $assetId
+        rm -f $messageFileId.json
+        rm -f $messageFileId.xml
     else
         echo "No messages in the queue." # later comment this to prevent excessive logs.
         rm -f $messageFileId.xml
     fi
-    
-
-
-
-
-    # This is for loop through commands when a message is received
-    # commandCount=10
-
-    # for (( i=0; i<$commandCount; i++ ))
-    # do 
-    #     echo "Welcome $i times"
-    # done
-
     sleep 60
 done
