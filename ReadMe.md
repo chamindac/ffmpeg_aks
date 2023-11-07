@@ -164,3 +164,15 @@ elapsed=$(($end - $start))
 $(($(stat --format=%s original)/1048576))
 
 $(du -h original)
+
+messageContent='{ "assetContianerName": "originals-de1885b94150-d6f6b9f9-f2eb-42cf-96c5-fe0be098fef3", "assetId": "bb5ab2dd-f89c-4689-976b-0de2fce614ec", "originalAssetBlobName": "original", "sourceStorageAccount": "cheuw001assetsstcool", "destinationStorageAccount": "cheuw001assetssthot", "commandArgs": [ { "inFileOptions": "-vf fps=1/4", "outFileName": "walk_%04d.png" }, { "inFileOptions": "-vcodec libx264 -crf 28 -preset ultrafast -c:a copy -s 1280x720", "outFileName": "walk_720p.mp4" } ] }'
+
+echo $messageContent | jq -r ".assetContianerName"
+echo $messageContent | jq -r ".commandArgs | length"
+
+queueMessage='<?xml version="1.0" encoding="utf-8"?><QueueMessagesList><QueueMessage><MessageId>d1d1469b-ca41-4500-82ac-23ff1d0e8167</MessageId><InsertionTime>Sun, 05 Nov 2023 18:11:40 GMT</InsertionTime><ExpirationTime>Sun, 12 Nov 2023 18:11:40 GMT</ExpirationTime><PopReceipt>AgAAAAMAAAAAAAAAZMcOzMQQ2gE=</PopReceipt><TimeNextVisible>Mon, 06 Nov 2023 15:20:38 GMT</TimeNextVisible><DequeueCount>15</DequeueCount><MessageText>{ "assetContianerName": "originals-de1885b94150-d6f6b9f9-f2eb-42cf-96c5-fe0be098fef3", "assetId": "bb5ab2dd-f89c-4689-976b-0de2fce614ec", "originalAssetBlobName": "original", "sourceStorageAccount": "cheuw001assetsstcool", "destinationStorageAccount": "cheuw001assetssthot", "commandArgs": [ { "inFileOptions": "-vf fps=1/4", "outFileName": "walk_%04d.png" }, { "inFileOptions": "-vcodec libx264 -crf 28 -preset ultrafast -c:a copy -s 1280x720", "outFileName": "walk_720p.mp4" } ] }</MessageText></QueueMessage></QueueMessagesList>'
+
+echo $queueMessage
+
+echo $queueMessage | yq --input-format xml -op ".QueueMessagesList.QueueMessage.MessageId"
+echo $queueMessage | yq --input-format xml -op ".QueueMessagesList | length"

@@ -51,13 +51,12 @@ ls -l
 
 queueSaSKey=""
 generatedDirName="generated"
-maxProcessWaitTime=14400
+maxProcessWaitTime=14400 # Max 4 hour wait for processing a file
 
 while :
 do
     currentDate=$(date '+%Y-%m-%d')
     
-
     if [ "$logDate" != "$currentDate" ]
     then
         logDate=$currentDate
@@ -75,34 +74,29 @@ do
 
     started=$(date '+%s')
     queueMessage=$(curl -s -X GET -H "x-ms-version: 2020-04-08" "https://chvideodeveuw001queuest.queue.core.windows.net/demovideoqueue/messages?visibilitytimeout=$maxProcessWaitTime&$queueSaSKey")
-
-    messageFileId=$(uuidgen)
-    echo $queueMessage > "$messageFileId.xml"
-    receivedMessageCount=$(yq --input-format xml -op ".QueueMessagesList | length" "$messageFileId.xml")
+    receivedMessageCount=$(echo $queueMessage | yq --input-format xml -op ".QueueMessagesList | length")
 
     if [ $receivedMessageCount -gt 0 ]
     then
-        messageId=$(yq --input-format xml -op ".QueueMessagesList.QueueMessage.MessageId" "$messageFileId.xml")
-        messagePopReceipt=$(yq --input-format xml -op ".QueueMessagesList.QueueMessage.PopReceipt" "$messageFileId.xml")
-        messageDequeueCount=$(yq --input-format xml -op ".QueueMessagesList.QueueMessage.DequeueCount" "$messageFileId.xml")
-        messageContent=$(yq --input-format xml -op ".QueueMessagesList.QueueMessage.MessageText" "$messageFileId.xml")
+        messageId=$(echo $queueMessage | yq --input-format xml -op ".QueueMessagesList.QueueMessage.MessageId")
+        messagePopReceipt=$(echo $queueMessage | yq --input-format xml -op ".QueueMessagesList.QueueMessage.PopReceipt")
+        messageDequeueCount=$(echo $queueMessage | yq --input-format xml -op ".QueueMessagesList.QueueMessage.DequeueCount")
+        messageContent=$(echo $queueMessage | yq --input-format xml -op ".QueueMessagesList.QueueMessage.MessageText")
 
         # Pop receipt must be encoded to enable passing it via querystring
         encodedMessagePopReceipt=$(echo -n $messagePopReceipt | jq -sRr @uri)
-
-        echo $messageContent > $messageFileId.json
 
         echo "Received below message from queue"
         echo "--------------------------------------------"
         echo $messageContent
         echo "--------------------------------------------"
 
-        assetContianerName=$(jq -r ".assetContianerName" "$messageFileId.json")
-        assetId=$(jq -r ".assetId" "$messageFileId.json")
-        originalAssetBlobName=$(jq -r ".originalAssetBlobName" "$messageFileId.json")
-        sourceStorageAccount=$(jq -r ".sourceStorageAccount" "$messageFileId.json")
-        destinationStorageAccount=$(jq -r ".destinationStorageAccount" "$messageFileId.json")
-        commandCount=$(jq -r ".commandArgs | length" "$messageFileId.json")
+        assetContianerName=$(echo $messageContent | jq -r ".assetContianerName")
+        assetId=$(echo $messageContent | jq -r ".assetId")
+        originalAssetBlobName=$(echo $messageContent | jq -r ".originalAssetBlobName")
+        sourceStorageAccount=$(echo $messageContent | jq -r ".sourceStorageAccount")
+        destinationStorageAccount=$(echo $messageContent | jq -r ".destinationStorageAccount")
+        commandCount=$(echo $messageContent | jq -r ".commandArgs | length")
 
         mkdir $assetId
         cd $assetId
@@ -117,8 +111,8 @@ do
             
             for (( i=0; i<$commandCount; i++ ))
             do 
-                outFileOptions=$(yq --input-format json -op .commandArgs.$i.outFileOptions ../$messageFileId.json)
-                outFileName=$(yq --input-format json -op .commandArgs.$i.outFileName ../$messageFileId.json)
+                outFileOptions=$(echo $messageContent | yq --input-format json -op .commandArgs.$i.outFileOptions)
+                outFileName=$(echo $messageContent | yq --input-format json -op .commandArgs.$i.outFileName)
 
                 echo "--------------------------------------------"
                 echo "Processing... ffmpeg -i $assetId $outFileOptions $generatedDirName/$outFileName"
@@ -171,11 +165,8 @@ do
         
         cd ..
         rm -rf $assetId
-        rm -f $messageFileId.json
-        rm -f $messageFileId.xml
     else
-        # echo "No messages in the queue." # later comment this to prevent excessive logs.
-        rm -f $messageFileId.xml
+        #echo "No messages in the queue." # later comment this to prevent excessive logs.
     fi
     sleep 1
 done

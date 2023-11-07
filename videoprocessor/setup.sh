@@ -6,10 +6,6 @@ echo "Setting up wget..."
 apt-get install wget
 echo "Setting up wget completed."
 
-echo "Setting up uuid-runtime..."
-apt-get install uuid-runtime
-echo "Setting up uuid-runtime completed."
-
 echo "Setting up yq..."
 wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
 chmod a+x /usr/local/bin/yq
@@ -46,7 +42,9 @@ az group list -o table
 # update all
 #RUN apt-get update && apt-get upgrade -y
 
-
+# echo "Setting up uuid-runtime..."
+# apt-get install uuid-runtime
+# echo "Setting up uuid-runtime completed."
 
 
 # install required packages
