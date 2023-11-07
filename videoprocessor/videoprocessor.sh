@@ -126,17 +126,17 @@ do
 
             uploadStarted=$(date '+%s')
             echo "--------------------------------------------"
-            echo "Uploading generated asste files..."
+            echo "Uploading generated asset files..."
             az storage container create --auth-mode login --account-name $destinationStorageAccount --name video-$assetId
             az storage blob upload-batch --auth-mode login --max-connections 5 --overwrite true --account-name $destinationStorageAccount -s $generatedDirName -d video-$assetId
-            echo "Uploading generated asste files completed."
+            echo "Uploading generated asset files completed."
             echo "--------------------------------------------"
 
             ended=$(date '+%s')
             totalElapsed=$(($ended - $started))
             uploadElapsed=$(($ended - $uploadStarted))
-            processElapsed=$(($ended - $processStarted))
-            downloadElapsed=$(($ended - $downloadStarted))
+            processElapsed=$(($uploadStarted - $processStarted))
+            downloadElapsed=$(($processStarted - $downloadStarted))
 
             echo "--------------------------------------------"
             echo "Successfully processed in $messageDequeueCount attempt(s). Removing message from the queue..."
