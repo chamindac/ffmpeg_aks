@@ -6,7 +6,9 @@ install-monitoring:
 	@kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/main/manifests/setup/0podmonitorCustomResourceDefinition.yaml
 	@kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/main/manifests/setup/0probeCustomResourceDefinition.yaml
 	@kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/main/manifests/setup/0prometheusCustomResourceDefinition.yaml
+	@kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/main/manifests/setup/0prometheusagentCustomResourceDefinition.yaml
 	@kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/main/manifests/setup/0prometheusruleCustomResourceDefinition.yaml
+	@kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/main/manifests/setup/0scrapeconfigCustomResourceDefinition.yaml
 	@kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/main/manifests/setup/0servicemonitorCustomResourceDefinition.yaml
 	@kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/main/manifests/setup/0thanosrulerCustomResourceDefinition.yaml
 	@kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/main/manifests/setup/namespace.yaml
@@ -193,7 +195,9 @@ delete-monitoring:
 	@kubectl delete -f https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/main/manifests/setup/namespace.yaml
 	@kubectl delete -f https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/main/manifests/setup/0thanosrulerCustomResourceDefinition.yaml
 	@kubectl delete -f https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/main/manifests/setup/0servicemonitorCustomResourceDefinition.yaml
+	@kubectl delete -f https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/main/manifests/setup/0scrapeconfigCustomResourceDefinition.yaml
 	@kubectl delete -f https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/main/manifests/setup/0prometheusruleCustomResourceDefinition.yaml
+	@kubectl delete -f https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/main/manifests/setup/0prometheusagentCustomResourceDefinition.yaml
 	@kubectl delete -f https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/main/manifests/setup/0prometheusCustomResourceDefinition.yaml
 	@kubectl delete -f https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/main/manifests/setup/0probeCustomResourceDefinition.yaml
 	@kubectl delete -f https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/main/manifests/setup/0podmonitorCustomResourceDefinition.yaml
