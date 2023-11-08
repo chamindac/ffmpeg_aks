@@ -140,10 +140,10 @@ do
             echo "Message removed from the queue."
             echo "Asset size: $assetSize"
             echo "Total time: $totalElapsed"
-            echo "Downoad time: $downloadElapsed"
+            echo "Download time: $downloadElapsed"
             echo "Process time: $processElapsed"
             echo "Upload time: $uploadElapsed"
-            echo -e "Asset size: $assetSize \nTotal time: $totalElapsed \nDownoad time: $downloadElapsed \nProcess time: $processElapsed \nUpload time: $uploadElapsed" > "$generatedDirName/processtime.txt"
+            echo -e "Asset size: $assetSize \nTotal time: $totalElapsed \nDowlnoad time: $downloadElapsed \nProcess time: $processElapsed \nUpload time: $uploadElapsed" > "$generatedDirName/processtime.txt"
             az storage blob upload --auth-mode login --overwrite true --account-name $destinationStorageAccount -f "$generatedDirName/processtime.txt" -n processtime.txt -c video-$assetId
             echo "--------------------------------------------"
 
