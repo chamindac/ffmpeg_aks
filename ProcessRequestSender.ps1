@@ -9,6 +9,8 @@ $ErrorActionPreference = 'Continue'
 
 $assets = Get-Content -Path "$PSScriptRoot/$assetsFilename" | ConvertFrom-Json
 
+$requestCount=0;
+
 foreach($asset in $assets)
 {
     $assetMessage = '<QueueMessage><MessageText>' + ($asset | ConvertTo-Json) + '</MessageText></QueueMessage>'
@@ -20,4 +22,8 @@ foreach($asset in $assets)
     $url = 'https://chvideodeveuw001queuest.queue.core.windows.net/demovideoqueue/messages?' + $queueSaSKey
 
     Invoke-WebRequest -Method Post -Uri $url -ContentType 'text/plain' -Body $assetMessage -Headers $head
+
+    $requestCount++;
 }
+
+Write-Host(-join("Total requests:", $requestCount))
