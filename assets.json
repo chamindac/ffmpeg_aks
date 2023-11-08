@@ -100,5 +100,73 @@
             "outFileName": "strangerthings_720p.mp4"
             }
         ]
+    },
+    {
+        "assetContianerName": "originals-de1885b94150-d6f6b9f9-f2eb-42cf-96c5-fe0be098fef3",
+        "assetId": "693cd80f-e1f0-4d42-b632-88a6829b196d",
+        "originalAssetBlobName": "original",
+        "sourceStorageAccount": "cheuw001assetsstcool",
+        "destinationStorageAccount": "cheuw001assetssthot",
+        "commandArgs": [
+            {
+            "outFileOptions": "-vf fps=1/4",
+            "outFileName": "snownight_%04d.png"
+            },
+            {
+            "outFileOptions": "-vcodec libx264 -crf 28 -preset ultrafast -c:a copy -s 1280x720",
+            "outFileName": "snownight_720p.mp4"
+            }
+        ]
+    },
+    {
+        "assetContianerName": "originals-de1885b94150-d6f6b9f9-f2eb-42cf-96c5-fe0be098fef3",
+        "assetId": "e9e398c9-222e-454d-8e88-c532be6d5842",
+        "originalAssetBlobName": "original",
+        "sourceStorageAccount": "cheuw001assetsstcool",
+        "destinationStorageAccount": "cheuw001assetssthot",
+        "commandArgs": [
+            {
+            "outFileOptions": "-vf fps=1/2",
+            "outFileName": "basketball_%04d.png"
+            },
+            {
+            "outFileOptions": "-vcodec libx264 -crf 28 -preset ultrafast -c:a copy -s 1280x720",
+            "outFileName": "basketball_720p.mp4"
+            }
+        ]
+    },
+    {
+        "assetContianerName": "originals-de1885b94150-d6f6b9f9-f2eb-42cf-96c5-fe0be098fef3",
+        "assetId": "e34a31a8-a169-47cb-b2ac-cf5edcdf444e",
+        "originalAssetBlobName": "original",
+        "sourceStorageAccount": "cheuw001assetsstcool",
+        "destinationStorageAccount": "cheuw001assetssthot",
+        "commandArgs": [
+            {
+            "outFileOptions": "-vf fps=1/2",
+            "outFileName": "jump_%04d.png"
+            },
+            {
+            "outFileOptions": "-vcodec libx264 -crf 28 -preset ultrafast -c:a copy -s 1280x720",
+            "outFileName": "jump_720p.mp4"
+            }
+        ]
+    },
+    {
+        "assetContianerName": "originals-de1885b94150-d6f6b9f9-f2eb-42cf-96c5-fe0be098fef3",
+        "assetId": "8299d8a0-0bd2-4024-be05-121edd2bba29",
+        "originalAssetBlobName": "original",
+        "sourceStorageAccount": "cheuw001assetsstcool",
+        "destinationStorageAccount": "cheuw001assetssthot",
+        "commandArgs": [
+            {
+            "outFileOptions": "-vf fps=1/2",
+            "outFileName": "kitelaunch_%04d.png"
+            },
+            {
+            "outFileOptions": "-vcodec libx264 -crf 28 -preset ultrafast -c:a copy -s 1280x720",
+            "outFileName": "kitelaunch_720p.mp4"
+            }
+        ]
     }
 ]
