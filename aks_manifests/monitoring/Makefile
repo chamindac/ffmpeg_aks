@@ -104,7 +104,7 @@ install-monitoring:
 
 delete-monitoring:
 
-	@kubectl apply -f ingress.yaml
+	@kubectl delete -f ingress.yaml
 	
 	@kubectl delete -f https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/main/manifests/prometheusOperator-serviceMonitor.yaml
 	@kubectl delete -f https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/main/manifests/prometheusOperator-serviceAccount.yaml
