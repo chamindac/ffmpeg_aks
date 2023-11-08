@@ -4,9 +4,9 @@ metadata:
   name: grafana
   namespace: monitoring
   annotations:
-    kubernetes.io/ingress.class: azure/application-gateway
     appgw.ingress.kubernetes.io/override-frontend-port: "3000" 
 spec:
+  ingressClassName: azure-application-gateway
   rules:
   - http:
       paths:
@@ -25,9 +25,9 @@ metadata:
   name: prometheus
   namespace: monitoring
   annotations:
-    kubernetes.io/ingress.class: azure/application-gateway
     appgw.ingress.kubernetes.io/override-frontend-port: "9090" 
 spec:
+  ingressClassName: azure-application-gateway
   rules:
   - http:
       paths:
@@ -46,9 +46,9 @@ metadata:
   name: alertmanager
   namespace: monitoring
   annotations:
-    kubernetes.io/ingress.class: azure/application-gateway
     appgw.ingress.kubernetes.io/override-frontend-port: "9093" 
 spec:
+  ingressClassName: azure-application-gateway
   rules:
   - http:
       paths:
