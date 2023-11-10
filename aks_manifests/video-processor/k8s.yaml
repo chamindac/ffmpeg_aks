@@ -1,10 +1,10 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: dynamicstorage-videoprocessor
+  name: video-processor
   namespace: media
   labels:
-    app: dynamicstorage-videoprocessor
+    app: video-processor
 spec:
   strategy:
     type: RollingUpdate
@@ -14,12 +14,12 @@ spec:
   minReadySeconds: 30
   selector:
     matchLabels:
-      service: dynamicstorage-videoprocessor
+      service: video-processor
   template:
     metadata:
       labels:
-        app: dynamicstorage-videoprocessor
-        service: dynamicstorage-videoprocessor
+        app: video-processor
+        service: video-processor
     spec:
       nodeSelector:
         "kubernetes.io/os": linux
@@ -47,7 +47,7 @@ spec:
       volumes:
         # # `name` here must match the name
         # # specified in the volume mount
-        # - name: demo-configmap-dynamicstorage-videoprocessor-volume
+        # - name: demo-configmap-video-processor-volume
         #   configMap:
         #     # `name` here must match the name
         #     # specified in the ConfigMap's YAML
@@ -57,7 +57,7 @@ spec:
             claimName: media-azurefile # PersistentVolumeClaim name in aks_manifests\dynamicfs\k8s.yaml
       terminationGracePeriodSeconds: 300 # This must be set to a value that is greater than the preStop hook wait time.
       containers:
-        - name: dynamicstorage-videoprocessor
+        - name: video-processor
           lifecycle:
             preStop:
               exec:
@@ -66,7 +66,7 @@ spec:
           imagePullPolicy: Always
           volumeMounts:
             # - mountPath: /etc/config
-            #   name: demo-configmap-dynamicstorage-videoprocessor-volume
+            #   name: demo-configmap-video-processor-volume
             - mountPath: /media/data
               name: media-data-volume
           env:
