@@ -48,8 +48,8 @@ metadata:
   namespace: media
 spec:
   hard:
-    requests.cpu: "20"
-    limits.memory: 70Gi
+    requests.cpu: "42"
+    limits.memory: 100Gi
   scopeSelector:
     matchExpressions:
     - operator : In
