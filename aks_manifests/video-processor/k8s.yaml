@@ -79,3 +79,47 @@ spec:
                 requests:
                   memory: 4Gi
                   cpu: "2"
+
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: video-processor-scaled-object
+  namespace: media
+  # annotations:
+  #   scaledobject.keda.sh/transfer-hpa-ownership: "true"      # Optional. Use to transfer an existing HPA ownership to this ScaledObject
+  #   autoscaling.keda.sh/paused-replicas: "0"                # Optional. Use to pause autoscaling of objects
+  #   autoscaling.keda.sh/paused: "true"                      # Optional. Use to pause autoscaling of objects explicitly
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1        # Optional. Default: apps/v1
+    kind: Deployment           # Optional. Default: Deployment
+    name: video-processor      # Mandatory. Must be in the same namespace as the ScaledObject
+    # envSourceContainerName: {container-name}                # Optional. Default: .spec.template.spec.containers[0]
+  pollingInterval:  5                                      # Optional. Default: 30 seconds
+  cooldownPeriod: 300                                     # Optional. Default: 300 seconds
+  idleReplicaCount: 0                                       # Optional. Default: ignored, must be less than minReplicaCount
+  minReplicaCount: 1                                       # Optional. Default: 0
+  maxReplicaCount: 10                                     # Optional. Default: 100
+  fallback:                                                 # Optional. Section to specify fallback options
+    failureThreshold: 3                                     # Mandatory if fallback section is included
+    replicas: 3                                             # Mandatory if fallback section is included
+  advanced:                                                 # Optional. Section to specify advanced options
+    restoreToOriginalReplicaCount: true               # Optional. Default: false
+    horizontalPodAutoscalerConfig:                          # Optional. Section to specify HPA related options
+      name: video-processor-hpa                        # Optional. Default: keda-hpa-{scaled-object-name}
+      behavior:                                             # Optional. Use to modify HPA's scaling behavior
+        scaleDown:
+          stabilizationWindowSeconds: 120
+          policies:
+          - type: Percent
+            value: 50
+            periodSeconds: 60
+  triggers:
+    - type: azure-queue
+      metadata:
+        queueName: demovideoqueue
+        queueLength: '1'
+        # activationQueueLength: '50'
+      authenticationRef:
+        name: video-processor-queue-storage-auth

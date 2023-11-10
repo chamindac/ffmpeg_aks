@@ -125,17 +125,17 @@ spec:
 
 
 # ---
-# # HPA for dynamicstorage-videoprocessor
+# # HPA for video-processor
 # apiVersion: autoscaling/v2
 # kind: HorizontalPodAutoscaler
 # metadata:
-#   name: dynamicstorage-videoprocessor-hpa
+#   name: video-processor-hpa
 #   namespace: media
 # spec:
 #   scaleTargetRef:
 #     apiVersion: apps/v1
 #     kind: Deployment
-#     name: dynamicstorage-videoprocessor
+#     name: video-processor
 #   maxReplicas: 10
 #   minReplicas: 1
 #   behavior:
@@ -167,7 +167,7 @@ spec:
 
 # KEDA ffmpeg storage queue authentication
 
-# using secret fro now. Test with config map later
+# using secret for now. Test with config map later
 ---
 apiVersion: v1
 kind: Secret
@@ -175,20 +175,16 @@ metadata:
   name: video-processor-queue-storage-connection
   namespace: media
 data:
-  connection-string: storageconnectionbase64value
+  connection-string: base64encodedstrageconnectionstring
 
-# ---
-# apiVersion: keda.sh/v1alpha1
-# kind: TriggerAuthentication
-# metadata:
-#   name: {trigger-authentication-name}
-#   namespace: media
-# spec:
-
-
-
-# secretTargetRef:  
-#   - key: {secret-key-name}
-#     parameter: {scaledObject-parameter-name} # this is defined in the scale object for Azurestorage queue this is connection (https://keda.sh/docs/2.12/scalers/azure-storage-queue/ connection OR authenticationRef that defines connection)
-#     name: {secret-name}     
-    
+---
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+  name: video-processor-queue-storage-auth
+  namespace: media
+spec:
+  secretTargetRef:  
+    - name: video-processor-queue-storage-connection # Name of the secret
+      key: connection-string # Secret data key name 
+      parameter: connection # This is defined in the scale object for Azurestorage queue. The "connection" (https://keda.sh/docs/2.12/scalers/azure-storage-queue/ connection OR authenticationRef that defines connection)
