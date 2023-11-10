@@ -54,7 +54,7 @@ spec:
         #     name: demo-configmap
         - name: media-data-volume
           persistentVolumeClaim:
-            claimName: media-azurefile # PersistentVolumeClaim name in aks_manifests\dynamicfs\k8s.yaml
+            claimName: media-azurefile-video-processor # PersistentVolumeClaim name in aks_manifests\prerequisites\k8s.yaml
       terminationGracePeriodSeconds: 300 # This must be set to a value that is greater than the preStop hook wait time.
       containers:
         - name: video-processor

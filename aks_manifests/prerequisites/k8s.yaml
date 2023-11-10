@@ -27,7 +27,7 @@ parameters:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: media-azurefile
+  name: media-azurefile-video-processor
   namespace: media
 spec:
   accessModes:
@@ -166,10 +166,29 @@ spec:
 #         averageUtilization: 70
 
 # KEDA ffmpeg storage queue authentication
+
+# using secret fro now. Test with config map later
 ---
-apiVersion: keda.sh/v1alpha1
-kind: TriggerAuthentication
+apiVersion: v1
+kind: Secret
 metadata:
-  name: {trigger-authentication-name}
+  name: video-processor-queue-storage-connection
   namespace: media
-spec:
+data:
+  connection-string: storageconnectionbase64value
+
+# ---
+# apiVersion: keda.sh/v1alpha1
+# kind: TriggerAuthentication
+# metadata:
+#   name: {trigger-authentication-name}
+#   namespace: media
+# spec:
+
+
+
+# secretTargetRef:  
+#   - key: {secret-key-name}
+#     parameter: {scaledObject-parameter-name} # this is defined in the scale object for Azurestorage queue this is connection (https://keda.sh/docs/2.12/scalers/azure-storage-queue/ connection OR authenticationRef that defines connection)
+#     name: {secret-name}     
+    
