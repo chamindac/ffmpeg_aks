@@ -55,13 +55,13 @@ spec:
         - name: media-data-volume
           persistentVolumeClaim:
             claimName: media-azurefile-video-processor # PersistentVolumeClaim name in aks_manifests\prerequisites\k8s.yaml
-      terminationGracePeriodSeconds: 300 # This must be set to a value that is greater than the preStop hook wait time.
+      terminationGracePeriodSeconds: 90 # This must be set to a value that is greater than the preStop hook wait time.
       containers:
         - name: video-processor
           lifecycle:
             preStop:
               exec:
-                command: ["sleep","180"]
+                command: ["sleep","60"]
           image: chdemosharedacr.azurecr.io/media/chmediaservice:1.1
           imagePullPolicy: Always
           volumeMounts:
@@ -97,8 +97,8 @@ spec:
     name: video-processor      # Mandatory. Must be in the same namespace as the ScaledObject
     # envSourceContainerName: {container-name}                # Optional. Default: .spec.template.spec.containers[0]
   pollingInterval:  5                                      # Optional. Default: 30 seconds
-  cooldownPeriod: 300                                     # Optional. Default: 300 seconds
-  idleReplicaCount: 0                                       # Optional. Default: ignored, must be less than minReplicaCount
+  #cooldownPeriod: 300                                     # Optional. Default: 300 seconds ( Applies only if scaling to 0. We are not doing that)
+  #idleReplicaCount: 0                                       # Optional. Default: ignored, must be less than minReplicaCount
   minReplicaCount: 1                                       # Optional. Default: 0
   maxReplicaCount: 10                                     # Optional. Default: 100
   fallback:                                                 # Optional. Section to specify fallback options

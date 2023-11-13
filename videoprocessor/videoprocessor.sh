@@ -51,7 +51,7 @@ ls -l
 
 queueSaSKey=""
 generatedDirName="generated"
-maxProcessWaitTime=14400 # Max 4 hour wait for processing a file
+maxProcessWaitTime=900 # temp 15 min 14400 # Max 4 hour wait for processing a file
 
 while :
 do
