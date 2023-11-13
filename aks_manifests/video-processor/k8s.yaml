@@ -98,7 +98,7 @@ spec:
     # envSourceContainerName: {container-name}                # Optional. Default: .spec.template.spec.containers[0]
   pollingInterval:  5                                      # Optional. Default: 30 seconds
   #cooldownPeriod: 300                                     # Optional. Default: 300 seconds ( Applies only if scaling to 0. We are not doing that)
-  #idleReplicaCount: 0                                       # Optional. Default: ignored, must be less than minReplicaCount
+  #idleReplicaCount: 0                                       # Optional. Default: ignored, must be less than minReplicaCount. Need to ignore running one replica always  https://github.com/kedacore/keda/issues/2314 
   minReplicaCount: 1                                       # Optional. Default: 0
   maxReplicaCount: 10                                     # Optional. Default: 100
   fallback:                                                 # Optional. Section to specify fallback options
