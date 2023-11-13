@@ -1,0 +1,108 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledJob
+metadata:
+  name: video-processor-scaled-job
+  namespace: media
+  # annotations:
+  #   autoscaling.keda.sh/paused: true          # Optional. Use to pause autoscaling of Jobs
+spec:
+  jobTargetRef:
+    parallelism: 1                            # [max number of desired pods](https://kubernetes.io/docs/concepts/workloads/controllers/job/#controlling-parallelism)
+    completions: 1                            # [desired number of successfully finished pods](https://kubernetes.io/docs/concepts/workloads/controllers/job/#controlling-parallelism)
+    activeDeadlineSeconds: 15000 # Should be higher than maxProcessWaitTime (14400) in video processor  #  Specifies the duration in seconds relative to the startTime that the job may be active before the system tries to terminate it; value must be positive integer
+    backoffLimit: 6                           # Specifies the number of retries before marking this job failed. Defaults to 6
+    template:
+      # ==========================================================
+      # describes the [job template](https://kubernetes.io/docs/concepts/workloads/controllers/job)
+      metadata:
+        labels:
+          app: video-processor
+          service: video-processor
+      spec:
+        nodeSelector:
+          "kubernetes.io/os": linux
+        priorityClassName: media-highest-priority-linux
+        #------------------------------------------------------
+        # setting pod DNS policies to enable faster DNS resolution
+        # https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy
+        dnsConfig:
+          options:
+            # use FQDN everywhere 
+            # any cluster local access from pods need full CNAME to resolve 
+            # short names will not resolve to internal cluster domains
+            - name: ndots
+              value: "2"
+            # dns resolver timeout and attempts
+            - name: timeout
+              value: "15"
+            - name: attempts
+              value: "3"
+            # use TCP to resolve DNS instad of using UDP (UDP is lossy and pods need to wait for timeout for lost packets)
+            - name: use-vc
+            # open new socket for retrying
+            - name: single-request-reopen
+        #------------------------------------------------------
+        volumes:
+          # # `name` here must match the name
+          # # specified in the volume mount
+          # - name: demo-configmap-video-processor-volume
+          #   configMap:
+          #     # `name` here must match the name
+          #     # specified in the ConfigMap's YAML
+          #     name: demo-configmap
+          - name: media-data-volume
+            persistentVolumeClaim:
+              claimName: media-azurefile-video-processor # PersistentVolumeClaim name in aks_manifests\prerequisites\k8s.yaml
+        terminationGracePeriodSeconds: 90 # This must be set to a value that is greater than the preStop hook wait time.
+        containers:
+          - name: video-processor
+            lifecycle:
+              preStop:
+                exec:
+                  command: ["sleep","60"]
+            image: chdemosharedacr.azurecr.io/media/chmediaservice:1.2
+            imagePullPolicy: Always
+            volumeMounts:
+              # - mountPath: /etc/config
+              #   name: demo-configmap-video-processor-volume
+              - mountPath: /media/data
+                name: media-data-volume
+            env:
+              - name: MEDIA_PATH
+                value: /media/data
+            resources:
+                  limits:
+                    memory: 4Gi # the memory limit equals to the request!
+                    # no cpu limit! this is excluded on purpose
+                  requests:
+                    memory: 4Gi
+                    cpu: "2"
+        # ==========================================================
+  pollingInterval: 5                         # Optional. Default: 30 seconds
+  successfulJobsHistoryLimit: 20               # Optional. Default: 100. How many completed jobs should be kept.
+  failedJobsHistoryLimit: 20                   # Optional. Default: 100. How many failed jobs should be kept.
+  # envSourceContainerName: {container-name}    # Optional. Default: .spec.JobTargetRef.template.spec.containers[0]
+  minReplicaCount: 0                          # Optional. Default: 0
+  maxReplicaCount: 10                        # Optional. Default: 100
+  # rolloutStrategy: gradual        # Deprecated: Use rollout.strategy instead (see below).
+  rollout:
+    strategy: gradual                         # We should not delete existing jobs. So gradual. # Optional. Default: default. Which Rollout Strategy KEDA will use.
+    propagationPolicy: foreground             # Optional. Default: background. Kubernetes propagation policy for cleaning up existing jobs during rollout.
+  scalingStrategy:
+    strategy: "default"   # We use default as locked messages should not appear in queue # Optional. Default: default. Which Scaling Strategy to use. 
+    # customScalingQueueLengthDeduction: 1      # Optional. A parameter to optimize custom ScalingStrategy.
+    # customScalingRunningJobPercentage: "0.5"  # Optional. A parameter to optimize custom ScalingStrategy.
+    # pendingPodConditions:                     # Optional. A parameter to calculate pending job count per the specified pod conditions
+    #   - "Ready"
+    #   - "PodScheduled"
+    #   - "Pending"
+    #   - "ContainerCreating"
+    # multipleScalersCalculation : "max" # Optional. Default: max. Specifies how to calculate the target metrics when multiple scalers are defined.
+  triggers:
+    - type: azure-queue
+      metadata:
+        queueName: demovideoqueue
+        queueLength: '1'
+        # activationQueueLength: '50'
+      authenticationRef:
+        name: video-processor-queue-storage-auth
