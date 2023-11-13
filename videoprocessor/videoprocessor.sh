@@ -98,7 +98,7 @@ do
         destinationStorageAccount=$(echo $messageContent | jq -r ".destinationStorageAccount")
         commandCount=$(echo $messageContent | jq -r ".commandArgs | length")
 
-        rm -rf $assetId # cleanup if any prevoius attempt data exist for the asset
+        rm -rf $assetId # clean up if any prevoius attempt data exist for the asset
         mkdir $assetId
         cd $assetId
         
