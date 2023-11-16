@@ -1,38 +1,108 @@
 ﻿using Azure.Storage.Blobs;
 using Azure.Storage;
 using Azure.Storage.Blobs.Models;
+using Azure.Storage.Queues;
+using Azure.Storage.Queues.Models;
+using System.Text.Json;
+using Xabe.FFmpeg;
+using System.Resources;
+using System;
 
 namespace videoprocessor.xabe;
 
 class Program
 {
     const string SourceStorageName = "cheuw001assetsstcool";
-    const string SourceStorageKey = "shouldbesecretinAKS";
-    const string OriginalAssetBlobName = "original";
+    const string SourceStorageKey = "";
 
-    static void Main(string[] args)
+    const string QueueStorageConnection = "";
+    const string QueueName = "demovideoqueue";
+
+    const string OutputFolderName = "generated";
+
+    static async Task Main(string[] args)
     {
         string? mediaPath = Environment.GetEnvironmentVariable("MEDIA_PATH");
 
+        //"C:\\temp\\videos";
+
         if (mediaPath is not null)
         {
-            string assetId = "bb5ab2dd-f89c-4689-976b-0de2fce614ec";
-            string assetContianer = "originals-de1885b94150-d6f6b9f9-f2eb-42cf-96c5-fe0be098fef3";
-            string assetFolderPath = Path.Combine(mediaPath, assetId);
+            //QueueClient queueClient = new(QueueStorageConnection, QueueName);
 
-            string assetPath = DownloadOrginalAsset(assetContianer, assetFolderPath, assetId);
+            //QueueMessage message = await queueClient.ReceiveMessageAsync(new TimeSpan(0, 0, 5)); // Max four hours to process
 
-            string[] assetFiles = Directory.GetFiles(assetFolderPath);
+            //Console.WriteLine($"Received message{message.Body}");
 
+            //JsonSerializerOptions serializeOptions = new JsonSerializerOptions()
+            //{
+            //    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            //};
+
+            //AssetMessage assetMessage = JsonSerializer.Deserialize<AssetMessage>(message.Body.ToString(), serializeOptions)
+            //    ?? new()
+            //    {
+            //        AssetContianerName = string.Empty,
+            //        AssetId = string.Empty,
+            //        OriginalAssetBlobName = string.Empty
+            //    };
+
+            AssetMessage assetMessage = new()
+            {
+                AssetContianerName = "originals-de1885b94150-d6f6b9f9-f2eb-42cf-96c5-fe0be098fef3",
+                AssetId = "a3a45e98-a2ce-4b37-84ab-3fbd1cae624f",
+                OriginalAssetBlobName = "original",
+                OutFilePrefix = "friendseating_"
+            };
+
+            Console.WriteLine($"Asset Id: {assetMessage.AssetId}");
+            Console.WriteLine($"Asset Container Name: {assetMessage.AssetContianerName}");
+
+            string assetFolderPath = Path.Combine(mediaPath, assetMessage.AssetId);
+            string assetPath = await DownloadOrginalAsset(assetMessage.AssetContianerName,
+                assetFolderPath,
+                assetMessage.AssetId,
+                assetMessage.OriginalAssetBlobName);
 
             Console.WriteLine($"Media path is: {mediaPath}");
-            foreach (var assetFile in assetFiles)
-            {
-                Console.WriteLine($": {assetFile}");
-            }
-            
+            Console.WriteLine($"Asset path is: {assetPath}");
+
+            string outputFolderPath = Path.Combine(assetFolderPath, OutputFolderName);
+
+            Directory.CreateDirectory(outputFolderPath);
+
+            IMediaInfo info = await FFmpeg.GetMediaInfo(assetPath);
+            Console.WriteLine($"Asset duration is: {info.Duration}");
+
+            IStream? videoStream = info.VideoStreams.FirstOrDefault()?
+                .SetSize(VideoSize.Hd720)
+                .SetCodec(VideoCodec.libx264);
+
+            IStream? audioStream = info.AudioStreams.FirstOrDefault();
+
+            IConversionResult resultVideo = await FFmpeg.Conversions.New()
+                .AddStream(videoStream, audioStream)
+                .SetOutput(Path.Combine(outputFolderPath, string.Concat(assetMessage.OutFilePrefix, "720.mp4")))
+                .Start();
+
+            Func<string, string> outputFileNameBuilder = (number) => { return Path.Combine(outputFolderPath, string.Concat(assetMessage.OutFilePrefix, number, ".png")); };
+
+            IVideoStream? videoStreamForImages = info.VideoStreams.First()?.SetCodec(VideoCodec.png);
+            int frameExctractionRate = (int) (videoStreamForImages.Framerate * videoStreamForImages.Duration.Seconds) / 10;
+
+            Console.WriteLine($"Frame extraction rate is:{frameExctractionRate}");
+
+            IConversionResult resultImages = await FFmpeg.Conversions.New()
+                .AddStream(videoStreamForImages)
+                .ExtractEveryNthFrame(frameExctractionRate, outputFileNameBuilder)
+                .Start();
+
+            Console.WriteLine($"Video covertion duration is: {resultVideo.Duration}");
+            Console.WriteLine($"Image covertion duration is: {resultImages.Duration}");
+            Console.WriteLine($"Process duration is: {resultImages.Duration.Add(resultVideo.Duration)}");
         }
     }
+
 
     private static BlobServiceClient GetBlobServiceClient(string accountName, string accountKey)
     {
@@ -43,19 +113,18 @@ class Program
 
         return new
             (new Uri(blobUri), sharedKeyCredential);
-
-
     }
 
-    public static string DownloadOrginalAsset(string assetCotainer,
+    private static async Task<string> DownloadOrginalAsset(string assetCotainer,
         string assetFolderPath,
-        string assetId)
+        string assetId,
+        string originalAssetBlobName)
     {
 
         BlobServiceClient blobServiceClient = GetBlobServiceClient(SourceStorageName, SourceStorageKey);
         BlobClient blobClient = blobServiceClient
                 .GetBlobContainerClient(assetCotainer)
-                .GetBlobClient($"{assetId}/{OriginalAssetBlobName}");
+                .GetBlobClient($"{assetId}/{originalAssetBlobName}");
 
         if (Directory.Exists(assetFolderPath))
         {
@@ -84,7 +153,7 @@ class Program
             TransferOptions = transferOptions
         };
 
-        blobClient.DownloadTo(fileStream, downloadOptions);
+        await blobClient.DownloadToAsync(fileStream, downloadOptions);
 
         fileStream.Close();
 
