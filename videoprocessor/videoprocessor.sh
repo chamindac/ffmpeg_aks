@@ -107,7 +107,7 @@ then
         else
             echo "Failed to process in $messageDequeueCount attempt. Adding message back to the queue..."
             curl -i -X PUT -H "x-ms-version: 2020-04-08" -H "Content-Length: 0" "https://chvideodeveuw001queuest.queue.core.windows.net/demovideoqueue/messages/$messageId?popreceipt=$encodedMessagePopReceipt&visibilitytimeout=1&$queueSaSKey"
-            echo "Message added to the queue."
+            echo "Message added back to the queue."
             echo "--------------------------------------------"
         fi
     }

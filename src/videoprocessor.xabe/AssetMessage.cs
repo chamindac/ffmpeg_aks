@@ -11,8 +11,7 @@ namespace videoprocessor.xabe
     {
         public required string AssetContianerName {get; set;}
         public required string AssetId { get; set; }
-        public required string OutFilePrefix { get; set; }
         public required string OriginalAssetBlobName { get; set; }
-        
+        public required string OutFilePrefix { get; set; }
     }
 }
