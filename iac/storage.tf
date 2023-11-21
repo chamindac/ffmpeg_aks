@@ -15,3 +15,8 @@ resource "azurerm_storage_queue" "video" {
   name                 = "demovideoqueue"
   storage_account_name = azurerm_storage_account.queue.name
 }
+
+resource "azurerm_storage_queue" "dotnet_video" {
+  name                 = "dotnetvideoqueue"
+  storage_account_name = azurerm_storage_account.queue.name
+}

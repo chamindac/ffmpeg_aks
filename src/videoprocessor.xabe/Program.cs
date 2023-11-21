@@ -22,7 +22,7 @@ class Program
     const string destinationStorageKey = "";
 
     const string QueueStorageConnection = "";
-    const string QueueName = "demovideoqueue";
+    const string QueueName = "dotnetvideoqueue";
 
     const string OutputFolderName = "generated";
 
