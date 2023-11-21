@@ -5,6 +5,7 @@
         "originalAssetBlobName": "original",
         "sourceStorageAccount": "cheuw001assetsstcool",
         "destinationStorageAccount": "cheuw001assetssthot",
+        "outFilePrefix": "walk",
         "commandArgs": [
             {
             "outFileOptions": "-vf fps=1/4",
@@ -22,6 +23,7 @@
         "originalAssetBlobName": "original",
         "sourceStorageAccount": "cheuw001assetsstcool",
         "destinationStorageAccount": "cheuw001assetssthot",
+        "outFilePrefix": "beach",
         "commandArgs": [
             {
             "outFileOptions": "-vf fps=1/2",
@@ -39,6 +41,7 @@
         "originalAssetBlobName": "original",
         "sourceStorageAccount": "cheuw001assetsstcool",
         "destinationStorageAccount": "cheuw001assetssthot",
+        "outFilePrefix": "friendseating",
         "commandArgs": [
             {
             "outFileOptions": "-vf fps=1/4",
@@ -56,6 +59,7 @@
         "originalAssetBlobName": "original",
         "sourceStorageAccount": "cheuw001assetsstcool",
         "destinationStorageAccount": "cheuw001assetssthot",
+        "outFilePrefix": "boatnewyork",
         "commandArgs": [
             {
             "outFileOptions": "-vf fps=1/4",
@@ -73,6 +77,7 @@
         "originalAssetBlobName": "original",
         "sourceStorageAccount": "cheuw001assetsstcool",
         "destinationStorageAccount": "cheuw001assetssthot",
+        "outFilePrefix": "waterstream",
         "commandArgs": [
             {
             "outFileOptions": "-vf fps=1/2",
@@ -90,6 +95,7 @@
         "originalAssetBlobName": "original",
         "sourceStorageAccount": "cheuw001assetsstcool",
         "destinationStorageAccount": "cheuw001assetssthot",
+        "outFilePrefix": "snownight",
         "commandArgs": [
             {
             "outFileOptions": "-vf fps=1/4",
@@ -107,6 +113,7 @@
         "originalAssetBlobName": "original",
         "sourceStorageAccount": "cheuw001assetsstcool",
         "destinationStorageAccount": "cheuw001assetssthot",
+        "outFilePrefix": "basketball",
         "commandArgs": [
             {
             "outFileOptions": "-vf fps=1/2",
@@ -124,6 +131,7 @@
         "originalAssetBlobName": "original",
         "sourceStorageAccount": "cheuw001assetsstcool",
         "destinationStorageAccount": "cheuw001assetssthot",
+        "outFilePrefix": "jump",
         "commandArgs": [
             {
             "outFileOptions": "-vf fps=1/2",
@@ -141,6 +149,7 @@
         "originalAssetBlobName": "original",
         "sourceStorageAccount": "cheuw001assetsstcool",
         "destinationStorageAccount": "cheuw001assetssthot",
+        "outFilePrefix": "kitelaunch",
         "commandArgs": [
             {
             "outFileOptions": "-vf fps=1/2",
@@ -158,6 +167,7 @@
         "originalAssetBlobName": "original",
         "sourceStorageAccount": "cheuw001assetsstcool",
         "destinationStorageAccount": "cheuw001assetssthot",
+        "outFilePrefix": "babyandmother",
         "commandArgs": [
             {
             "outFileOptions": "-vf fps=1/2",
@@ -175,6 +185,7 @@
         "originalAssetBlobName": "original",
         "sourceStorageAccount": "cheuw001assetsstcool",
         "destinationStorageAccount": "cheuw001assetssthot",
+        "outFilePrefix": "picnic",
         "commandArgs": [
             {
             "outFileOptions": "-vf fps=1/2",
@@ -192,6 +203,7 @@
         "originalAssetBlobName": "original",
         "sourceStorageAccount": "cheuw001assetsstcool",
         "destinationStorageAccount": "cheuw001assetssthot",
+        "outFilePrefix": "helicopter",
         "commandArgs": [
             {
             "outFileOptions": "-vf fps=1/4",
@@ -209,6 +221,7 @@
         "originalAssetBlobName": "original",
         "sourceStorageAccount": "cheuw001assetsstcool",
         "destinationStorageAccount": "cheuw001assetssthot",
+        "outFilePrefix": "bicycle",
         "commandArgs": [
             {
             "outFileOptions": "-vf fps=1/4",
@@ -226,6 +239,7 @@
         "originalAssetBlobName": "original",
         "sourceStorageAccount": "cheuw001assetsstcool",
         "destinationStorageAccount": "cheuw001assetssthot",
+        "outFilePrefix": "offroadcar",
         "commandArgs": [
             {
             "outFileOptions": "-vf fps=1/4",
@@ -243,6 +257,7 @@
         "originalAssetBlobName": "original",
         "sourceStorageAccount": "cheuw001assetsstcool",
         "destinationStorageAccount": "cheuw001assetssthot",
+        "outFilePrefix": "redvantrip",
         "commandArgs": [
             {
             "outFileOptions": "-vf fps=1/4",
@@ -260,6 +275,7 @@
         "originalAssetBlobName": "original",
         "sourceStorageAccount": "cheuw001assetsstcool",
         "destinationStorageAccount": "cheuw001assetssthot",
+        "outFilePrefix": "fastbus",
         "commandArgs": [
             {
             "outFileOptions": "-vf fps=1/2",
@@ -277,6 +293,7 @@
         "originalAssetBlobName": "original",
         "sourceStorageAccount": "cheuw001assetsstcool",
         "destinationStorageAccount": "cheuw001assetssthot",
+        "outFilePrefix": "buses",
         "commandArgs": [
             {
             "outFileOptions": "-vf fps=1/4",
@@ -294,6 +311,7 @@
         "originalAssetBlobName": "original",
         "sourceStorageAccount": "cheuw001assetsstcool",
         "destinationStorageAccount": "cheuw001assetssthot",
+        "outFilePrefix": "train",
         "commandArgs": [
             {
             "outFileOptions": "-vf fps=1/2",
@@ -311,6 +329,7 @@
         "originalAssetBlobName": "original",
         "sourceStorageAccount": "cheuw001assetsstcool",
         "destinationStorageAccount": "cheuw001assetssthot",
+        "outFilePrefix": "redtram",
         "commandArgs": [
             {
             "outFileOptions": "-vf fps=1/2",
@@ -328,6 +347,7 @@
         "originalAssetBlobName": "original",
         "sourceStorageAccount": "cheuw001assetsstcool",
         "destinationStorageAccount": "cheuw001assetssthot",
+        "outFilePrefix": "swisstrain",
         "commandArgs": [
             {
             "outFileOptions": "-vf fps=1/3",
@@ -345,6 +365,7 @@
         "originalAssetBlobName": "original",
         "sourceStorageAccount": "cheuw001assetsstcool",
         "destinationStorageAccount": "cheuw001assetssthot",
+        "outFilePrefix": "planelanding",
         "commandArgs": [
             {
             "outFileOptions": "-vf fps=1/3",
@@ -362,6 +383,7 @@
         "originalAssetBlobName": "original",
         "sourceStorageAccount": "cheuw001assetsstcool",
         "destinationStorageAccount": "cheuw001assetssthot",
+        "outFilePrefix": "cruise",
         "commandArgs": [
             {
             "outFileOptions": "-vf fps=1/3",
@@ -379,6 +401,7 @@
         "originalAssetBlobName": "original",
         "sourceStorageAccount": "cheuw001assetsstcool",
         "destinationStorageAccount": "cheuw001assetssthot",
+        "outFilePrefix": "skiing",
         "commandArgs": [
             {
             "outFileOptions": "-vf fps=1/2",
