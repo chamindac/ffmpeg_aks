@@ -114,6 +114,7 @@ class Program
                 IConversionResult resultVideo = await FFmpeg.Conversions.New()
                     .AddStream(videoStream, audioStream)
                     .SetOutput(Path.Combine(outputFolderPath, string.Concat(assetMessage.OutFilePrefix, "_720.mp4")))
+                    .AddParameter("-crf 28 -preset ultrafast -c:a copy")
                     .Start();
 
                 // Delegate for image name
@@ -122,7 +123,7 @@ class Program
                 // Obtain video file for extacting images as png
                 IVideoStream videoStreamForImages = info.VideoStreams.First().SetCodec(VideoCodec.png);
                 // Calculate image extraction frame rate, to extract 10 images from the video
-                int frameExctractionRate = (int)(videoStreamForImages.Framerate * videoStreamForImages.Duration.Seconds) / 9; // Divide by 10 gives 11 images
+                int frameExctractionRate = (int)(videoStreamForImages.Framerate * videoStreamForImages.Duration.TotalSeconds) / 9; // Divide by 10 gives 11 images
 
                 Console.WriteLine($"Frame extraction rate is:{frameExctractionRate}");
 
@@ -154,7 +155,7 @@ class Program
                 StreamWriter processTimeInfoFileStream = File.CreateText(processTimeInfoFilePath);
                 await processTimeInfoFileStream.WriteLineAsync($"Asset size:{assetSize} MB");
                 await processTimeInfoFileStream.WriteLineAsync($"Download duration is:{downloadTimer.Elapsed.TotalSeconds} seconds");
-                await processTimeInfoFileStream.WriteLineAsync($"Process duration is:{resultImages.Duration.Add(resultVideo.Duration)} seconds");
+                await processTimeInfoFileStream.WriteLineAsync($"Process duration is:{resultImages.Duration.Add(resultVideo.Duration)}");
                 await processTimeInfoFileStream.WriteLineAsync($"Upload duration is:{uploadTimer.Elapsed.TotalSeconds} seconds");
                 processTimeInfoFileStream.Close();
 
