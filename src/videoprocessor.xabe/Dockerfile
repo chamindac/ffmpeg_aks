@@ -14,7 +14,7 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0-jammy-amd64 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["videoprocessor.xabe/videoprocessor.xabe.csproj", "videoprocessor.xabe/"]
-RUN dotnet restore "./videoprocessor.xabe/./videoprocessor.xabe.csproj"  -r linux-x64
+RUN dotnet restore "./videoprocessor.xabe/videoprocessor.xabe.csproj"  -r linux-x64
 COPY . .
 WORKDIR "/src/videoprocessor.xabe"
 
