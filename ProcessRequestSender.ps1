@@ -1,5 +1,5 @@
-﻿$assetsFilename = 'assetsToProcess.json' # assetsToProcess assets
-$queueName = 'demovideoqueue' # dotnetvideoqueue  demovideoqueue
+﻿$assetsFilename = 'assets.json' # assetsToProcess assets
+$queueName = 'dotnetvideoqueue' # dotnetvideoqueue  demovideoqueue
 
 $queueStorageAccKey = az storage account keys list -g ch-video-dev-euw-001-rg -n chvideodeveuw001queuest --query [0].value -o tsv
 
