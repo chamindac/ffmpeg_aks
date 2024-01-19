@@ -194,6 +194,23 @@ resource "azurerm_federated_identity_credential" "aks" {
   }
 }
 
+# Federated identity credential for AKS user assigned id - used with workload identity service account
+resource "azurerm_federated_identity_credential" "keda" {
+  name                = "${var.prefix}-${var.project}-${var.environment_name}-aks-keda-fic-${var.deployment_name}"
+  resource_group_name = var.rg_name
+  audience            = ["api://AzureADTokenExchange"]
+  issuer              = azurerm_kubernetes_cluster.aks_cluster.oidc_issuer_url # Open id connect issue url from AKS
+  parent_id           = var.user_assigned_identity                             # user assigned identity id (Azure resource id)
+  subject             = "system:serviceaccount:keda:keda-operator"             # system:serviceaccount:aksapplicationnamespace:workloadidentityserviceaccountname (to be created after AKS cluster is setup)
+
+  depends_on = [
+    azurerm_kubernetes_cluster.aks_cluster
+  ]
+  lifecycle {
+    ignore_changes = []
+  }
+}
+
 resource "azurerm_role_assignment" "acr_attach" {
   principal_id                     = azurerm_kubernetes_cluster.aks_cluster.kubelet_identity[0].object_id
   role_definition_name             = "AcrPull"
