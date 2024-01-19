@@ -20,3 +20,10 @@ resource "azurerm_storage_queue" "dotnet_video" {
   name                 = "dotnetvideoqueue"
   storage_account_name = azurerm_storage_account.queue.name
 }
+
+resource "azurerm_role_assignment" "storage_q_contributor" {
+  principal_id                     = azurerm_user_assigned_identity.aks.principal_id
+  role_definition_name             = "Storage Queue Data Contributor"
+  scope                            = azurerm_storage_account.queue.id
+  skip_service_principal_aad_check = true
+}
