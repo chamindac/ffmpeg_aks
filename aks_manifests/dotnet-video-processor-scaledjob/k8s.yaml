@@ -18,7 +18,9 @@ spec:
         labels:
           app: dotnet-video-processor
           service: dotnet-video-processor
+          azure.workload.identity/use: "true"
       spec:
+        serviceAccountName: ch-video-wi-sa
         nodeSelector:
           "kubernetes.io/os": linux
         priorityClassName: media-highest-priority-linux
@@ -103,6 +105,7 @@ spec:
       metadata:
         queueName: dotnetvideoqueue
         queueLength: '1'
+        accountName: chvideodeveuw001queuest # storage-account-name
         # activationQueueLength: '50'
       authenticationRef:
         name: video-processor-queue-storage-auth

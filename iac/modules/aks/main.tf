@@ -194,7 +194,7 @@ resource "azurerm_federated_identity_credential" "aks" {
   }
 }
 
-# Federated identity credential for AKS user assigned id - used with workload identity service account
+# Federated identity credential for AKS user assigned id - used with workload identity service account for KEDA
 resource "azurerm_federated_identity_credential" "keda" {
   name                = "${var.prefix}-${var.project}-${var.environment_name}-aks-keda-fic-${var.deployment_name}"
   resource_group_name = var.rg_name
