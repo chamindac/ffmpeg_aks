@@ -1,0 +1,26 @@
+# KEDA ffmpeg storage queue authentication
+
+# using secret is not secure. using workload identity instead
+# ---
+# apiVersion: v1
+# kind: Secret
+# metadata:
+#   name: video-processor-queue-storage-connection
+#   namespace: media
+# data:
+#   connection-string: base64encodedstrageconnectionstring
+
+---
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+  name: video-processor-queue-storage-auth
+  namespace: media
+spec:
+  podIdentity:
+    provider:  azure-workload  # Optional. Default: none
+    identityId: clientid
+  # secretTargetRef:  # Using secret is not secure. using workload identity instead
+  #   - name: video-processor-queue-storage-connection # Name of the secret
+  #     key: connection-string # Secret data key name 
+  #     parameter: connection # This is defined in the scale object for Azurestorage queue. The "connection" (https://keda.sh/docs/2.12/scalers/azure-storage-queue/ connection OR authenticationRef that defines connection)

@@ -165,26 +165,14 @@ spec:
 #         type: Utilization
 #         averageUtilization: 70
 
-# KEDA ffmpeg storage queue authentication
 
-# using secret for now. Test with config map later
+# Service account for AKS workload identity
 ---
 apiVersion: v1
-kind: Secret
+kind: ServiceAccount
 metadata:
-  name: video-processor-queue-storage-connection
+  annotations:
+    azure.workload.identity/client-id:  # "${sys_aks_uai_client_id}$"
+    azure.workload.identity/tenant-id:  # "${tenantid}$"
+  name: ch-video-wi-sa # Referred by AKS user assigned identity federated credential
   namespace: media
-data:
-  connection-string: base64encodedstrageconnectionstring
-
----
-apiVersion: keda.sh/v1alpha1
-kind: TriggerAuthentication
-metadata:
-  name: video-processor-queue-storage-auth
-  namespace: media
-spec:
-  secretTargetRef:  
-    - name: video-processor-queue-storage-connection # Name of the secret
-      key: connection-string # Secret data key name 
-      parameter: connection # This is defined in the scale object for Azurestorage queue. The "connection" (https://keda.sh/docs/2.12/scalers/azure-storage-queue/ connection OR authenticationRef that defines connection)
