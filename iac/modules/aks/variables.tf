@@ -82,3 +82,7 @@ variable "tags" {
 variable "sub_owners_objectid" {
   description = "AD group sub_owners object id"
 }
+
+variable "user_assigned_identity" {
+  description = "AKS user assigned identity"
+}

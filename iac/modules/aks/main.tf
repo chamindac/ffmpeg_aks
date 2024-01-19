@@ -139,6 +139,9 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
     zones                = ["1", "2", "3"]
   }
 
+  oidc_issuer_enabled       = true # Allow creating open id connect issue url to be used in federated identity credential
+  workload_identity_enabled = true # Enable workload identity in AKS
+
   identity {
     type = "SystemAssigned"
   }
@@ -172,6 +175,23 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
   tags = merge(tomap({
     Service = "aks_cluster"
   }), var.tags)
+}
+
+# Federated identity credential for AKS user assigned id - used with workload identity service account
+resource "azurerm_federated_identity_credential" "aks" {
+  name                = "${var.prefix}-${var.project}-${var.environment_name}-aks-fic-${var.deployment_name}"
+  resource_group_name = var.rg_name
+  audience            = ["api://AzureADTokenExchange"]
+  issuer              = azurerm_kubernetes_cluster.aks_cluster.oidc_issuer_url # Open id connect issue url from AKS
+  parent_id           = var.user_assigned_identity                             # user assigned identity id (Azure resource id)
+  subject             = "system:serviceaccount:media:ch-video-wi-sa"           # system:serviceaccount:aksapplicationnamespace:workloadidentityserviceaccountname (to be created after AKS cluster is setup)
+
+  depends_on = [
+    azurerm_kubernetes_cluster.aks_cluster
+  ]
+  lifecycle {
+    ignore_changes = []
+  }
 }
 
 resource "azurerm_role_assignment" "acr_attach" {

@@ -37,3 +37,8 @@ output "app_deploy_dns_zone" {
     )
   )), "*", ""), ".")
 }
+
+# Client Id of the workload (user assigned) identity - to be used in service account creation after AKS deployed
+output "aks_uai_client_id" {
+  value = azurerm_user_assigned_identity.aks.client_id
+}

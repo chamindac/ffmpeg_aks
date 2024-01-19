@@ -1,7 +1,7 @@
 resource "azurerm_storage_account" "queue" {
-  name                     = "${var.PREFIX}${var.PROJECT}${replace(var.ENVNAME, "-", "")}queuest"
-  resource_group_name      = azurerm_resource_group.instancerg.name
-  location                 = azurerm_resource_group.instancerg.location
+  name                             = "${var.PREFIX}${var.PROJECT}${replace(var.ENVNAME, "-", "")}queuest"
+  resource_group_name              = azurerm_resource_group.instancerg.name
+  location                         = azurerm_resource_group.instancerg.location
   account_tier                     = "Standard"
   account_replication_type         = "LRS"
   account_kind                     = "StorageV2"
