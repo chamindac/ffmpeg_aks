@@ -6,6 +6,17 @@ terraform init -backend-config='/backends/dev.cfg'
 terraform plan -var-file='env.tfvars' -out='my.tfplan'
 terraform apply my.tfplan
 
+Set up helm in WSL following instructions in https://chamindac.blogspot.com/2023/12/setting-up-helm-in-wsl.html
+
+Then do following
+
+cd aks_manifests\prerequisites
+run make file to setup prereuisites including keda namespace and keda-operator service account
+
+cd aks_manifests\keda
+intall keda with helm using ./installkeda.sh
+then setup trigger authentications for keda by running make
+
 If sh files gives not found issues. rename current files. create new setup.sh and videoprocessor.sh with same content.
 Then docker build works. To avoid this on windows run below command for git before cloning this repo.
 git config --global core.autocrlf false

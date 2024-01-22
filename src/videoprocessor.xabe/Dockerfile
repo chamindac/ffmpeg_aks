@@ -1,4 +1,4 @@
-FROM linuxserver/ffmpeg:amd64-version-6.0-cli AS base
+FROM linuxserver/ffmpeg:amd64-version-6.1-cli AS base
 WORKDIR /app
 
 COPY ["videoprocessor.xabe/setup.sh","setup.sh"]

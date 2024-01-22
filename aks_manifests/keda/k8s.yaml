@@ -18,8 +18,7 @@ metadata:
   namespace: media
 spec:
   podIdentity:
-    provider:  azure-workload  # Optional. Default: none
-    identityId: clientid
+    provider: azure-workload
   # secretTargetRef:  # Using secret is not secure. using workload identity instead
   #   - name: video-processor-queue-storage-connection # Name of the secret
   #     key: connection-string # Secret data key name 
