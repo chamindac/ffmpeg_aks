@@ -27,3 +27,27 @@ resource "azurerm_role_assignment" "storage_q_contributor" {
   scope                            = azurerm_storage_account.queue.id
   skip_service_principal_aad_check = true
 }
+
+data "azurerm_storage_account" "cool" {
+  name                = "cheuw001assetsstcool"
+  resource_group_name = "ch-euw-001-assets-rg"
+}
+
+data "azurerm_storage_account" "hot" {
+  name                = "cheuw001assetssthot"
+  resource_group_name = "ch-euw-001-assets-rg"
+}
+
+resource "azurerm_role_assignment" "coolstorage_blob_contributor" {
+  principal_id                     = azurerm_user_assigned_identity.aks.principal_id
+  role_definition_name             = "Storage Blob Data Contributor"
+  scope                            = data.azurerm_storage_account.cool.id
+  skip_service_principal_aad_check = true
+}
+
+resource "azurerm_role_assignment" "hotstorage_blob_contributor" {
+  principal_id                     = azurerm_user_assigned_identity.aks.principal_id
+  role_definition_name             = "Storage Blob Data Contributor"
+  scope                            = data.azurerm_storage_account.hot.id
+  skip_service_principal_aad_check = true
+}
