@@ -5,25 +5,18 @@ using Azure.Storage.Queues;
 using Azure.Storage.Queues.Models;
 using System.Text.Json;
 using Xabe.FFmpeg;
-using System.Resources;
-using System;
 using Azure;
 using System.Diagnostics;
-using System.ComponentModel;
+using Azure.Identity;
 
 namespace videoprocessor.xabe;
 
 class Program
 {
     const string SourceStorageName = "cheuw001assetsstcool";
-    const string SourceStorageKey = "";
-
-    const string destinationStorageName = "cheuw001assetssthot";
-    const string destinationStorageKey = "";
-
-    const string QueueStorageConnection = "";
+    const string DestinationStorageName = "cheuw001assetssthot";
+    const string QueueStorageName = "chvideodeveuw001queuest";
     const string QueueName = "dotnetvideoqueue";
-
     const string OutputFolderName = "generated";
 
     static async Task Main(string[] args)
@@ -34,14 +27,15 @@ class Program
         if (mediaPath is not null)
         {
             // Get first message from queue with 4 hour hide time for message and exist if no messages
-            QueueClient queueClient = new(QueueStorageConnection, QueueName);
+            QueueClient queueClient = new(new Uri($"https://{QueueStorageName}.queue.core.windows.net/{QueueName}"),
+                new DefaultAzureCredential());
             QueueMessage message = await queueClient.ReceiveMessageAsync(new TimeSpan(0, 4, 0)); // Max four hours to process
 
             if (message is null)
             {
                 Console.WriteLine($"No messages to process");
                 return;
-            }   
+            }
 
             Console.WriteLine($"Received message{message.Body}");
 
@@ -139,8 +133,7 @@ class Program
 
                 // Upload generated 720p video and exxtracted images to target blob storage
                 Stopwatch uploadTimer = Stopwatch.StartNew();
-                BlobServiceClient destinationBlobServiceClient = GetBlobServiceClient(destinationStorageName,
-                    destinationStorageKey);
+                BlobServiceClient destinationBlobServiceClient = GetBlobServiceClient(DestinationStorageName);
 
                 BlobContainerClient destinationContainer = await CreateDestinationContainer(destinationBlobServiceClient,
                     string.Concat("dotnet-", assetMessage.AssetId));
@@ -161,7 +154,7 @@ class Program
 
                 // Upload process time info file
                 BlobClient blob = destinationContainer.GetBlobClient(processTimeInfoFileName);
-                await blob.UploadAsync(processTimeInfoFilePath, overwrite:true);
+                await blob.UploadAsync(processTimeInfoFilePath, overwrite: true);
 
                 // Remove processed message from queue
                 await queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt);
@@ -221,7 +214,7 @@ class Program
                     MaximumConcurrency = 8,
 
                     // Set the maximum length of a transfer to 50MB.
-                    MaximumTransferSize = 50 * 1024 * 1024                    
+                    MaximumTransferSize = 50 * 1024 * 1024
                 }
             };
 
@@ -256,15 +249,10 @@ class Program
         }
     }
 
-    private static BlobServiceClient GetBlobServiceClient(string accountName, string accountKey)
+    private static BlobServiceClient GetBlobServiceClient(string accountName)
     {
-        Azure.Storage.StorageSharedKeyCredential sharedKeyCredential =
-            new StorageSharedKeyCredential(accountName, accountKey);
-
-        string blobUri = "https://" + accountName + ".blob.core.windows.net";
-
-        return new
-            (new Uri(blobUri), sharedKeyCredential);
+        return new(new Uri($"https://{accountName}.blob.core.windows.net"),
+            new DefaultAzureCredential());
     }
 
     private static async Task<string> DownloadOrginalAsset(string assetCotainer,
@@ -273,7 +261,7 @@ class Program
         string originalAssetBlobName)
     {
 
-        BlobServiceClient blobServiceClient = GetBlobServiceClient(SourceStorageName, SourceStorageKey);
+        BlobServiceClient blobServiceClient = GetBlobServiceClient(SourceStorageName);
         BlobClient blobClient = blobServiceClient
                 .GetBlobContainerClient(assetCotainer)
                 .GetBlobClient($"{assetId}/{originalAssetBlobName}");
