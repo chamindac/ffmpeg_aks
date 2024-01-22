@@ -177,7 +177,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   annotations:
-    azure.workload.identity/client-id: "${sys_aks_uai_client_id}$" # "${sys_aks_uai_client_id}$"
+    azure.workload.identity/client-id: ${sys_aks_uai_client_id}$ # ${sys_aks_uai_client_id}$
     azure.workload.identity/tenant-id: ${tenantid}$ # "${tenantid}$"
   name: ch-video-wi-sa # Referred by AKS user assigned identity federated credential
   namespace: media
@@ -187,7 +187,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   annotations:
-    azure.workload.identity/client-id: "${sys_aks_uai_client_id}$" # "${sys_aks_uai_client_id}$"
+    azure.workload.identity/client-id: ${sys_aks_uai_client_id}$ # ${sys_aks_uai_client_id}$
     azure.workload.identity/tenant-id: ${tenantid}$ # "${tenantid}$"
   name: keda-operator # Referred by AKS user assigned identity federated credential
   namespace: keda
