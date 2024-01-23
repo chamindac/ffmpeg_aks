@@ -108,4 +108,4 @@ spec:
         accountName: chvideodeveuw001queuest # storage-account-name
         # activationQueueLength: '50'
       authenticationRef:
-        name: video-processor-queue-storage-auth
+        name: video-processor-queue-auth
