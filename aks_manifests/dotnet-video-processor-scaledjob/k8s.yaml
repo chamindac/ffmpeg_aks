@@ -62,7 +62,7 @@ spec:
               preStop:
                 exec:
                   command: ["sleep","60"]
-            image: chdemosharedacr.azurecr.io/media/chdotnetmediaservice:1.2
+            image: chdemosharedacr.azurecr.io/media/chdotnetmediaservice:1.3
             imagePullPolicy: Always
             volumeMounts:
               # - mountPath: /etc/config
@@ -101,11 +101,22 @@ spec:
     #   - "ContainerCreating"
     # multipleScalersCalculation : "max" # Optional. Default: max. Specifies how to calculate the target metrics when multiple scalers are defined.
   triggers:
-    - type: azure-queue
+    - type: azure-servicebus
       metadata:
         queueName: dotnetvideoqueue
-        queueLength: '1'
-        accountName: chvideodeveuw001queuest # storage-account-name
-        # activationQueueLength: '50'
+        namespace: ch-video-dev-euw-001-sbus
+        messageCount: "1"
       authenticationRef:
         name: video-processor-queue-auth
+    #--------------
+    # Below is how the storage queue is used as trigger
+    #--------------
+    # - type: azure-queue
+    #   metadata:
+    #     queueName: dotnetvideoqueue
+    #     queueLength: '1'
+    #     accountName: chvideodeveuw001queuest # storage-account-name
+    #     # activationQueueLength: '50'
+    #   authenticationRef:
+    #     name: video-processor-queue-auth
+    #--------------
