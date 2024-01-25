@@ -8,6 +8,8 @@ using Xabe.FFmpeg;
 using Azure;
 using System.Diagnostics;
 using Azure.Identity;
+using Azure.Messaging.ServiceBus;
+using Microsoft.Azure.Amqp.Framing;
 
 namespace videoprocessor.xabe;
 
@@ -16,6 +18,7 @@ class Program
     const string SourceStorageName = "cheuw001assetsstcool";
     const string DestinationStorageName = "cheuw001assetssthot";
     const string QueueStorageName = "chvideodeveuw001queuest";
+    const string ServieBusNamespace = "ch-video-dev-euw-001-sbus.servicebus.windows.net";
     const string QueueName = "dotnetvideoqueue";
     const string OutputFolderName = "generated";
 
@@ -26,14 +29,35 @@ class Program
 
         if (mediaPath is not null)
         {
+            ServiceBusClientOptions clientOptions = new ()
+            {
+                TransportType = ServiceBusTransportType.AmqpWebSockets
+            };
+
+            ServiceBusClient servieBusClient = new (
+                ServieBusNamespace,
+                new DefaultAzureCredential(),
+                clientOptions);
+
+            ServiceBusReceiver serviceBusReceiver = servieBusClient.CreateReceiver(QueueName);
+
+            ServiceBusReceivedMessage serviceBusMessage = await serviceBusReceiver.ReceiveMessageAsync(TimeSpan.FromSeconds(10));
+
+            if (serviceBusMessage is not null) 
+            {
+                Console.WriteLine($"Recevied service bus message: {serviceBusMessage.Body}");
+                await serviceBusReceiver.CompleteMessageAsync(serviceBusMessage);
+            }
+
+
             // Get first message from queue with 4 hour hide time for message and exist if no messages
             QueueClient queueClient = new(new Uri($"https://{QueueStorageName}.queue.core.windows.net/{QueueName}"),
-                new DefaultAzureCredential());
+                    new DefaultAzureCredential());
             QueueMessage message = await queueClient.ReceiveMessageAsync(new TimeSpan(0, 4, 0)); // Max four hours to process
 
             if (message is null)
             {
-                Console.WriteLine($"No messages to process");
+                Console.WriteLine($"No messages to process from storage queue");
                 return;
             }
 
