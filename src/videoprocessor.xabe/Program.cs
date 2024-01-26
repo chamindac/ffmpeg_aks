@@ -29,12 +29,12 @@ class Program
 
         if (mediaPath is not null)
         {
-            ServiceBusClientOptions clientOptions = new ()
+            ServiceBusClientOptions clientOptions = new()
             {
                 TransportType = ServiceBusTransportType.AmqpWebSockets
             };
 
-            ServiceBusClient servieBusClient = new (
+            ServiceBusClient servieBusClient = new(
                 ServieBusNamespace,
                 new DefaultAzureCredential(),
                 clientOptions);
@@ -43,25 +43,40 @@ class Program
 
             ServiceBusReceivedMessage serviceBusMessage = await serviceBusReceiver.ReceiveMessageAsync(TimeSpan.FromSeconds(10));
 
-            if (serviceBusMessage is not null) 
+            string queueMessage = string.Empty;
+
+            if (serviceBusMessage is not null)
             {
+                queueMessage = serviceBusMessage.Body.ToString();
                 Console.WriteLine($"Recevied service bus message: {serviceBusMessage.Body}");
                 await serviceBusReceiver.CompleteMessageAsync(serviceBusMessage);
+            }
+            else
+            {
+                Console.WriteLine($"No messages to process from service bus queue");
             }
 
 
             // Get first message from queue with 4 hour hide time for message and exist if no messages
             QueueClient queueClient = new(new Uri($"https://{QueueStorageName}.queue.core.windows.net/{QueueName}"),
                     new DefaultAzureCredential());
-            QueueMessage message = await queueClient.ReceiveMessageAsync(new TimeSpan(0, 4, 0)); // Max four hours to process
+            QueueMessage storageMessage = await queueClient.ReceiveMessageAsync(new TimeSpan(0, 4, 0)); // Max four hours to process
 
-            if (message is null)
+            if (storageMessage is not null)
+            {
+                queueMessage = storageMessage.Body.ToString();
+                Console.WriteLine($"Received message{storageMessage.Body}");
+            }
+            else
             {
                 Console.WriteLine($"No messages to process from storage queue");
+            }
+
+            if (serviceBusMessage is null && storageMessage is null)
+            {
                 return;
             }
 
-            Console.WriteLine($"Received message{message.Body}");
 
             // Extract received message body
             JsonSerializerOptions serializeOptions = new JsonSerializerOptions()
@@ -69,7 +84,7 @@ class Program
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase
             };
 
-            AssetMessage assetMessage = JsonSerializer.Deserialize<AssetMessage>(message.Body.ToString(), serializeOptions)
+            AssetMessage assetMessage = JsonSerializer.Deserialize<AssetMessage>(queueMessage, serializeOptions)
                 ?? new()
                 {
                     AssetContianerName = string.Empty,
@@ -180,26 +195,32 @@ class Program
                 BlobClient blob = destinationContainer.GetBlobClient(processTimeInfoFileName);
                 await blob.UploadAsync(processTimeInfoFilePath, overwrite: true);
 
-                // Remove processed message from queue
-                await queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt);
-                Console.WriteLine($"Successfully processed in {message.DequeueCount} attempt(s). Removing message from the queue...");
+                if (storageMessage is not null)
+                {
+                    // Remove processed message from queue
+                    await queueClient.DeleteMessageAsync(storageMessage.MessageId, storageMessage.PopReceipt);
+                    Console.WriteLine($"Successfully processed in {storageMessage.DequeueCount} attempt(s). Removing message from the queue...");
+                }
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
 
-                // Allow retry message processing for 3 attempts, remove message if 3 attempts and still failing
-                if (message.DequeueCount >= 3)
+                if (storageMessage is not null)
                 {
-                    Console.WriteLine("Failed to process in 3 attempts. Removing message from the queue...");
-                    await queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt);
-                    Console.WriteLine("Message removed from the queue.");
-                }
-                else
-                {
-                    Console.WriteLine($"Failed to process in {message.DequeueCount} attempt. Adding message back to the queue...");
-                    await queueClient.UpdateMessageAsync(message.MessageId, message.PopReceipt, visibilityTimeout: new TimeSpan(0, 0, 1));
-                    Console.WriteLine("Message added back to the queue.");
+                    // Allow retry message processing for 3 attempts, remove message if 3 attempts and still failing
+                    if (storageMessage.DequeueCount >= 3)
+                    {
+                        Console.WriteLine("Failed to process in 3 attempts. Removing message from the queue...");
+                        await queueClient.DeleteMessageAsync(storageMessage.MessageId, storageMessage.PopReceipt);
+                        Console.WriteLine("Message removed from the queue.");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Failed to process in {storageMessage.DequeueCount} attempt. Adding message back to the queue...");
+                        await queueClient.UpdateMessageAsync(storageMessage.MessageId, storageMessage.PopReceipt, visibilityTimeout: new TimeSpan(0, 0, 1));
+                        Console.WriteLine("Message added back to the queue.");
+                    }
                 }
             }
             finally
