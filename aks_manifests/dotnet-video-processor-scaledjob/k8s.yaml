@@ -62,7 +62,7 @@ spec:
               preStop:
                 exec:
                   command: ["sleep","60"]
-            image: chdemosharedacr.azurecr.io/media/chdotnetmediaservice:1.3
+            image: chdemosharedacr.azurecr.io/media/chdotnetmediaservice:1.4
             imagePullPolicy: Always
             volumeMounts:
               # - mountPath: /etc/config
@@ -104,7 +104,7 @@ spec:
     - type: azure-servicebus
       metadata:
         queueName: dotnetvideoqueue
-        namespace: ch-video-dev-euw-001-sbus
+        namespace: ch-video-dev-euw-001-sbus-blue
         messageCount: "1"
       authenticationRef:
         name: video-processor-queue-auth

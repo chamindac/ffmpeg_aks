@@ -20,7 +20,7 @@ var clientOptions = new ServiceBusClientOptions
 };
 //TODO: Replace the "<NAMESPACE-NAME>" and "<QUEUE-NAME>" placeholders.
 client = new ServiceBusClient(
-    "ch-video-dev-euw-001-sbus.servicebus.windows.net",
+    "ch-video-dev-euw-001-sbus-blue.servicebus.windows.net",
     new DefaultAzureCredential(
         new DefaultAzureCredentialOptions
         {

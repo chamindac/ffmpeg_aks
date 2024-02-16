@@ -18,7 +18,7 @@ class Program
     const string SourceStorageName = "cheuw001assetsstcool";
     const string DestinationStorageName = "cheuw001assetssthot";
     const string QueueStorageName = "chvideodeveuw001queuest";
-    const string ServieBusNamespace = "ch-video-dev-euw-001-sbus.servicebus.windows.net";
+    const string ServieBusNamespace = "ch-video-dev-euw-001-sbus-blue.servicebus.windows.net"; // Based on blue green this should come from app config
     const string QueueName = "dotnetvideoqueue";
     const string OutputFolderName = "generated";
 
