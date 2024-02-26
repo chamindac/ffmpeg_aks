@@ -1,12 +1,13 @@
 # Locals
 locals {
   dummy_secret          = "NotSecret"
+  dummy_value           = "dummyvalue"
   deployment_name_blue  = "blue"
   deployment_name_green = "green"
   aks_dns_prefix_blue   = "aksblue"
   aks_dns_prefix_green  = "aksgreen"
   aks_dns_prefix_live   = var.SYS_GREEN_IS_LIVE ? local.aks_dns_prefix_green : local.aks_dns_prefix_blue
-
+  dev_ip                = "193.91.207.187"
   tags = {
     Environment          = var.ENV
     Owner                = "Demo Team"
