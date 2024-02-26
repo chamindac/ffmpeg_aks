@@ -7,7 +7,7 @@ locals {
   aks_dns_prefix_blue   = "aksblue"
   aks_dns_prefix_green  = "aksgreen"
   aks_dns_prefix_live   = var.SYS_GREEN_IS_LIVE ? local.aks_dns_prefix_green : local.aks_dns_prefix_blue
-  dev_ip                = "193.91.207.187"
+  dev_ip                = "10.10.10.10"
   tags = {
     Environment          = var.ENV
     Owner                = "Demo Team"
