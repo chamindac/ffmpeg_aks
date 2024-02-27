@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "common-lib", "common-lib\co
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "videoprocessor.eventhub", "videoprocessor.eventhub\videoprocessor.eventhub.csproj", "{E22ED6CD-F867-4354-AA25-DC4867C071E9}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "eventhub.messagesender", "eventhub.messagesender\eventhub.messagesender.csproj", "{E6A6C8CF-5377-4543-A499-FBDDE73811CE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{E22ED6CD-F867-4354-AA25-DC4867C071E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E22ED6CD-F867-4354-AA25-DC4867C071E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E22ED6CD-F867-4354-AA25-DC4867C071E9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E6A6C8CF-5377-4543-A499-FBDDE73811CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E6A6C8CF-5377-4543-A499-FBDDE73811CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E6A6C8CF-5377-4543-A499-FBDDE73811CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E6A6C8CF-5377-4543-A499-FBDDE73811CE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
