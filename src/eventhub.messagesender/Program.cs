@@ -9,7 +9,7 @@ namespace eventhub.messagesender;
 
 internal class Program
 {
-    const string EventHubName = "videopreview";
+    private const string EventHubName = "videopreview";
 
     static async Task Main(string[] args)
     {

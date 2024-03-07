@@ -1,35 +1,36 @@
 ﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using common.lib.Configs;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace videoprocessor.eventhub;
 
 internal class Program
 {
     static async Task Main(string[] args)
-    {
-        var builder = new HostBuilder();
-        
-        builder.ConfigureAppConfiguration((config) =>
-        {
-            ConfigLoader.LoadConfiguration(config);
-        });
-
-        builder.ConfigureLogging((context, b) =>
-        {
-            b.AddConsole();
-        });
-
-        //builder.ConfigureWebJobs(b =>
-        //{
-        //    b.AddEventHubs();
-        //});
-
-        var host = builder.Build();
-
-        using (host)
+    {   
+        using (IHost host = CreateHostBuilder().Build())
         {
             await host.RunAsync();
         }
+    }
+
+    private static IHostBuilder CreateHostBuilder()
+    {
+        return Host.CreateDefaultBuilder()
+            .UseConsoleLifetime()
+            .ConfigureAppConfiguration((config) =>
+            {
+                ConfigLoader.LoadConfiguration(config);
+            })
+            .ConfigureServices((_, services) =>
+            {
+                services.AddHostedService<ScaledJobHostedService>();
+            })
+            .ConfigureLogging((_, logging) =>
+            {
+                logging.ClearProviders();
+                logging.AddSimpleConsole(options => options.IncludeScopes = true);
+            });
     }
 }
