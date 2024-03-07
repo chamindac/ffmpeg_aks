@@ -7,7 +7,7 @@ namespace common.lib.Configs
 {
     public class ConfigLoader
     {
-        public static void LoadConfiguration(IConfigurationBuilder configBuilder)
+        public static IConfigurationRoot LoadConfiguration(IConfigurationBuilder configBuilder)
         {
             configBuilder.AddJsonFile(Environment.GetEnvironmentVariable("CH_VIDEO_WI_CONFIG"));
 
@@ -29,11 +29,10 @@ namespace common.lib.Configs
                     // or specify environment variable AZURE_TENANT_ID
                     // or VS if you are logged into an Azure AD account having access to app config and key vault that would be sufficient
                     // or in vscode terminal az login and set subscription to a subscription in the tenant you want to use before "dotnet run"
-                    //new DefaultAzureCredentialOptions
-                    //{
-                    //    TenantId = aadTenantId
-                    //}
-                    );
+                    new DefaultAzureCredentialOptions
+                    {
+                        TenantId = aadTenantId
+                    });
                 options.Connect(
                     new Uri(appConfigEndpont),
                     azureCredentials);
@@ -50,7 +49,7 @@ namespace common.lib.Configs
                     kv.Register(secretClient));
             });
 
-            configBuilder.Build();
+            return configBuilder.Build();
         }
     }
 }
