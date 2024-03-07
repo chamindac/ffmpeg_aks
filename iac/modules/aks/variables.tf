@@ -1,6 +1,6 @@
 # Locals
 locals {
-  kubernetes_version = "1.27.3" # we decide when to upgrade
+  kubernetes_version = "1.28.5" # we decide when to upgrade
 }
 
 variable "prefix" {

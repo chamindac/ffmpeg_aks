@@ -48,17 +48,17 @@ resource "azurerm_key_vault" "instancekeyvault" {
 # Secrets 
 resource "azurerm_key_vault_secret" "secret" {
   for_each = {
-    AzureWebJobsStorage-blue  = var.SYS_BLUE_DEPLOY ? "${module.eventhubs_blue[0].storage_connection_string}" : "${local.dummy_secret}"
-    EventHubConsumer-1-blue   = var.SYS_BLUE_DEPLOY ? "${module.eventhubs_blue[0].consumer_1}" : "${local.dummy_secret}"
-    EventHubPublisher-1-blue  = var.SYS_BLUE_DEPLOY ? "${module.eventhubs_blue[0].publisher_1}" : "${local.dummy_secret}"
-    EventHubConsumer-2-blue   = var.SYS_BLUE_DEPLOY ? "${module.eventhubs_blue[0].consumer_2}" : "${local.dummy_secret}"
-    EventHubPublisher-2-blue  = var.SYS_BLUE_DEPLOY ? "${module.eventhubs_blue[0].publisher_2}" : "${local.dummy_secret}"
-    AzureWebJobsStorage-green = var.SYS_GREEN_DEPLOY ? "${module.eventhubs_green[0].storage_connection_string}" : "${local.dummy_secret}"
-    EventHubConsumer-1-green  = var.SYS_GREEN_DEPLOY ? "${module.eventhubs_green[0].consumer_1}" : "${local.dummy_secret}"
-    EventHubPublisher-1-green = var.SYS_GREEN_DEPLOY ? "${module.eventhubs_green[0].publisher_1}" : "${local.dummy_secret}"
-    EventHubConsumer-2-green  = var.SYS_GREEN_DEPLOY ? "${module.eventhubs_green[0].consumer_2}" : "${local.dummy_secret}"
-    EventHubPublisher-2-green = var.SYS_GREEN_DEPLOY ? "${module.eventhubs_green[0].publisher_2}" : "${local.dummy_secret}"
-    DemoSecret                = "Notarealsecret"
+    # AzureWebJobsStorage-blue  = var.SYS_BLUE_DEPLOY ? "${module.eventhubs_blue[0].storage_connection_string}" : "${local.dummy_secret}"
+    # EventHubConsumer-1-blue   = var.SYS_BLUE_DEPLOY ? "${module.eventhubs_blue[0].consumer_1}" : "${local.dummy_secret}"
+    # EventHubPublisher-1-blue  = var.SYS_BLUE_DEPLOY ? "${module.eventhubs_blue[0].publisher_1}" : "${local.dummy_secret}"
+    # EventHubConsumer-2-blue   = var.SYS_BLUE_DEPLOY ? "${module.eventhubs_blue[0].consumer_2}" : "${local.dummy_secret}"
+    # EventHubPublisher-2-blue  = var.SYS_BLUE_DEPLOY ? "${module.eventhubs_blue[0].publisher_2}" : "${local.dummy_secret}"
+    # AzureWebJobsStorage-green = var.SYS_GREEN_DEPLOY ? "${module.eventhubs_green[0].storage_connection_string}" : "${local.dummy_secret}"
+    # EventHubConsumer-1-green  = var.SYS_GREEN_DEPLOY ? "${module.eventhubs_green[0].consumer_1}" : "${local.dummy_secret}"
+    # EventHubPublisher-1-green = var.SYS_GREEN_DEPLOY ? "${module.eventhubs_green[0].publisher_1}" : "${local.dummy_secret}"
+    # EventHubConsumer-2-green  = var.SYS_GREEN_DEPLOY ? "${module.eventhubs_green[0].consumer_2}" : "${local.dummy_secret}"
+    # EventHubPublisher-2-green = var.SYS_GREEN_DEPLOY ? "${module.eventhubs_green[0].publisher_2}" : "${local.dummy_secret}"
+    DemoSecret = "Notarealsecret"
   }
   name         = each.key
   value        = each.value

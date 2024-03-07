@@ -16,10 +16,15 @@ module "eventhubs_blue" {
   environment      = var.ENV
   environment_name = var.ENVNAME
   deployment_name  = local.deployment_name_blue
-  location         = azurerm_resource_group.instancerg.location
-  rg_name          = azurerm_resource_group.instancerg.name
-  aks_subnet_id    = azurerm_subnet.aks.id
-  tags             = local.tags
+
+  location      = azurerm_resource_group.instancerg.location
+  rg_name       = azurerm_resource_group.instancerg.name
+  aks_subnet_id = azurerm_subnet.aks.id
+
+  sub_owners_objectid                     = data.azuread_group.sub_owners.object_id
+  aks_user_assigned_identity_principal_id = azurerm_user_assigned_identity.aks.principal_id
+
+  tags = local.tags
 }
 
 module "eventhubs_green" {
@@ -40,8 +45,13 @@ module "eventhubs_green" {
   environment      = var.ENV
   environment_name = var.ENVNAME
   deployment_name  = local.deployment_name_green
-  location         = azurerm_resource_group.instancerg.location
-  rg_name          = azurerm_resource_group.instancerg.name
-  aks_subnet_id    = azurerm_subnet.aks.id
-  tags             = local.tags
+
+  location      = azurerm_resource_group.instancerg.location
+  rg_name       = azurerm_resource_group.instancerg.name
+  aks_subnet_id = azurerm_subnet.aks.id
+
+  sub_owners_objectid                     = data.azuread_group.sub_owners.object_id
+  aks_user_assigned_identity_principal_id = azurerm_user_assigned_identity.aks.principal_id
+
+  tags = local.tags
 }

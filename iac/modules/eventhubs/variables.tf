@@ -48,3 +48,11 @@ variable "tags" {
   description = "Map of tags to assign to the Cluster"
   type        = map(string)
 }
+
+variable "sub_owners_objectid" {
+  description = "AD group sub_owners object id"
+}
+
+variable "aks_user_assigned_identity_principal_id" {
+  description = "AKS user assigned identity principal id"
+}
