@@ -18,7 +18,8 @@ internal sealed class ScaledJobHostedService : BackgroundService
 {
     private const string EventHubName = "videopreview";
     private const string EventHubConsumer = "videoprevieweventhandler";
-    private const int TerminationWaitSeconds = 60;
+    private const int TerminationWaitSeconds = 30;
+    private const int TerminationGracePeriodSeconds = 60;
     private const int EventProcessCheckIntervalSeconds = 5;
 
     private readonly ILogger<ScaledJobHostedService> _logger;
@@ -56,12 +57,12 @@ internal sealed class ScaledJobHostedService : BackgroundService
 
         var processor = new EventProcessorClient(
             storageClient,
-            EventHubConsumerClient.DefaultConsumerGroupName,
+            EventHubConsumer,
             $"{eventhubNamespace}.servicebus.windows.net",
             $"{EventHubName}",
             azureCredentials);
 
-
+        
         // Register handlers for processing events and handling errors
         processor.ProcessEventAsync += ProcessEventHandler;
         processor.ProcessErrorAsync += ProcessErrorHandler;
@@ -90,6 +91,7 @@ internal sealed class ScaledJobHostedService : BackgroundService
         // Stop the processing
         await processor.StopProcessingAsync();
         _logger.LogInformation("Video processing job terminated.");
+        await Task.Delay(TimeSpan.FromSeconds(TerminationGracePeriodSeconds));
         _applicationLifetime.StopApplication();
     }
 
