@@ -18,7 +18,6 @@ internal sealed class ScaledJobHostedService : BackgroundService
 {
     private const string EventHubName = "videopreview";
     private const string EventHubConsumer = "videoprevieweventhandler";
-    private const int TerminationWaitSeconds = 30;
     private const int TerminationGracePeriodSeconds = 60;
     private const int EventProcessCheckIntervalSeconds = 5;
 
@@ -78,7 +77,7 @@ internal sealed class ScaledJobHostedService : BackgroundService
             {
                 _continueProcessing = false;
                 _logger.LogInformation("Video processing job termination intiated...");
-                await Task.Delay(TimeSpan.FromSeconds(TerminationWaitSeconds));
+                await Task.Delay(TimeSpan.FromSeconds(TerminationGracePeriodSeconds));
             }
             else
             {
@@ -90,12 +89,14 @@ internal sealed class ScaledJobHostedService : BackgroundService
 
         // Stop the processing
         await processor.StopProcessingAsync();
+        processor.ProcessEventAsync -= ProcessEventHandler;
+        processor.ProcessErrorAsync -= ProcessErrorHandler;
         _logger.LogInformation("Video processing job terminated.");
-        await Task.Delay(TimeSpan.FromSeconds(TerminationGracePeriodSeconds));
+        
         _applicationLifetime.StopApplication();
     }
 
-    private Task ProcessEventHandler(ProcessEventArgs eventArgs)
+    private async Task ProcessEventHandler(ProcessEventArgs eventArgs)
     {
         if (_terminateIntiated)
         {
@@ -105,12 +106,12 @@ internal sealed class ScaledJobHostedService : BackgroundService
         }
 
         // Write the body of the event to the console window
+        await eventArgs.UpdateCheckpointAsync(); // update checkpoint so we mark the message is processed
         Console.WriteLine("\tReceived event: {0}", Encoding.UTF8.GetString(eventArgs.Data.Body.ToArray()));
         Console.WriteLine("Processing...");
         Task.Delay(TimeSpan.FromSeconds(10)); // This where we call video process service to generate previews
 
         _terminateIntiated = true;
-        return Task.CompletedTask;
     }
 
     private Task ProcessErrorHandler(ProcessErrorEventArgs eventArgs)
