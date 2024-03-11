@@ -1,16 +1,11 @@
 ﻿using Azure.Identity;
 using Azure.Messaging.EventHubs;
-using Azure.Messaging.EventHubs.Consumer;
 using Azure.Messaging.EventHubs.Processor;
 using Azure.Storage.Blobs;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace videoprocessor.eventhub;
 
@@ -19,8 +14,7 @@ internal sealed class ScaledJobHostedService : BackgroundService
     private const string EventHubName = "videopreview";
     private const string EventHubConsumer = "videoprevieweventhandler";
     private const int TerminationGracePeriodSeconds = 60;
-    //private const int EventProcessCheckIntervalSeconds = 5;
-
+    
     private readonly ILogger<ScaledJobHostedService> _logger;
     private readonly IHostApplicationLifetime _applicationLifetime;
     private readonly IConfiguration _configuration;
@@ -28,8 +22,7 @@ internal sealed class ScaledJobHostedService : BackgroundService
 
     private bool _terminateIntiated;
     private int _runningJobCount;
-    //private bool _continueProcessing;
-
+    
     public ScaledJobHostedService(
         ILogger<ScaledJobHostedService> logger,
         IHostApplicationLifetime applicationLifetime,
@@ -75,21 +68,6 @@ internal sealed class ScaledJobHostedService : BackgroundService
             // Start the processing
             await processor.StartProcessingAsync();
 
-            //while (_continueProcessing)
-            //{
-            //    if (_terminateIntiated)
-            //    {
-            //        _continueProcessing = false;
-            //        _logger.LogInformation("Event handler job termination intiated...");
-            //        await Task.Delay(TimeSpan.FromSeconds(TerminationGracePeriodSeconds));
-            //    }
-            //    else
-            //    {
-            //        // Check event processing status
-            //        await Task.Delay(TimeSpan.FromSeconds(EventProcessCheckIntervalSeconds));
-            //        _logger.LogInformation($"Event handler job running...");
-            //    }
-            //}
             _logger.LogInformation($"Event handler job started for {EventHubConsumer}-{EventHubName} event processing...");
             await Task.Delay(Timeout.Infinite, _cancellationTokenSource.Token);
 
@@ -154,8 +132,8 @@ internal sealed class ScaledJobHostedService : BackgroundService
 
         // Write the body of the event to the console window
         await eventArgs.UpdateCheckpointAsync(); // update checkpoint so we mark the message is processed
-        Console.WriteLine("\tReceived event: {0}", Encoding.UTF8.GetString(eventArgs.Data.Body.ToArray()));
-        Console.WriteLine("Processing...");
+        _logger.LogInformation("\tReceived event: {0}", Encoding.UTF8.GetString(eventArgs.Data.Body.ToArray()));
+        _logger.LogInformation("Processing...");
         await Task.Delay(TimeSpan.FromSeconds(10)); // This where we call video process service to generate previews
 
         if (_runningJobCount > 0) { _runningJobCount--; }
@@ -165,8 +143,8 @@ internal sealed class ScaledJobHostedService : BackgroundService
     private Task ProcessErrorHandler(ProcessErrorEventArgs eventArgs)
     {
         // Write details about the error to the console window
-        Console.WriteLine($"\tPartition '{eventArgs.PartitionId}': an unhandled exception was encountered. This was not expected to happen.");
-        Console.WriteLine(eventArgs.Exception.Message);
+        _logger.LogInformation($"\tPartition '{eventArgs.PartitionId}': an unhandled exception was encountered. This was not expected to happen.");
+        _logger.LogInformation(eventArgs.Exception.Message);
         return Task.CompletedTask;
     }
 }
