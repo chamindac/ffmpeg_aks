@@ -42,7 +42,7 @@ internal sealed class ScaledJobHostedService : BackgroundService
     {
 
         string eventhubNamespace = _configuration["EventHubNamespaceName-1"];
-        _logger.LogInformation($"Video processing job started for {eventhubNamespace}.");
+        _logger.LogInformation($"Event handler job started for {eventhubNamespace}.");
 
         DefaultAzureCredential azureCredentials = new DefaultAzureCredential(
                 new DefaultAzureCredentialOptions
@@ -76,14 +76,14 @@ internal sealed class ScaledJobHostedService : BackgroundService
             if (_terminateIntiated)
             {
                 _continueProcessing = false;
-                _logger.LogInformation("Video processing job termination intiated...");
+                _logger.LogInformation("Event handler job termination intiated...");
                 await Task.Delay(TimeSpan.FromSeconds(TerminationGracePeriodSeconds));
             }
             else
             {
                 // Check event processing status
                 await Task.Delay(TimeSpan.FromSeconds(EventProcessCheckIntervalSeconds));
-                _logger.LogInformation($"Video processing job running...");
+                _logger.LogInformation($"Event handler job running...");
             }
         }
 
@@ -91,7 +91,7 @@ internal sealed class ScaledJobHostedService : BackgroundService
         await processor.StopProcessingAsync();
         processor.ProcessEventAsync -= ProcessEventHandler;
         processor.ProcessErrorAsync -= ProcessErrorHandler;
-        _logger.LogInformation("Video processing job terminated.");
+        _logger.LogInformation("Event handler job terminated.");
         
         _applicationLifetime.StopApplication();
     }
@@ -102,7 +102,7 @@ internal sealed class ScaledJobHostedService : BackgroundService
         {
             _continueProcessing = true;
             _terminateIntiated = false;
-            _logger.LogInformation("Video processing job termination cancelled...");
+            _logger.LogInformation("Event handler job termination cancelled...");
         }
 
         // Write the body of the event to the console window

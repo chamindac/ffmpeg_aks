@@ -80,27 +80,26 @@ internal class Program
                     ]
                 }
              """,
-            // """
-            //     {
-            //         "assetContianerName": "originals-de1885b94150-d6f6b9f9-f2eb-42cf-96c5-fe0be098fef3",
-            //         "assetId": "227ac968-7f98-41b5-806c-cd966f41128c",
-            //         "originalAssetBlobName": "original",
-            //         "sourceStorageAccount": "cheuw001assetsstcool",
-            //         "destinationStorageAccount": "cheuw001assetssthot",
-            //         "outFilePrefix": "beach",
-            //         "commandArgs": [
-            //             {
-            //             "outFileOptions": "-vf fps=1/2",
-            //             "outFileName": "beach_%04d.png"
-            //             },
-            //             {
-            //             "outFileOptions": "-vcodec libx264 -crf 28 -preset ultrafast -c:a copy -s 720x1280",
-            //             "outFileName": "beach_720p.mp4"
-            //             }
-            //         ]
-            //     }
-            //  """
-            //  ,
+            """
+                {
+                    "assetContianerName": "originals-de1885b94150-d6f6b9f9-f2eb-42cf-96c5-fe0be098fef3",
+                    "assetId": "227ac968-7f98-41b5-806c-cd966f41128c",
+                    "originalAssetBlobName": "original",
+                    "sourceStorageAccount": "cheuw001assetsstcool",
+                    "destinationStorageAccount": "cheuw001assetssthot",
+                    "outFilePrefix": "beach",
+                    "commandArgs": [
+                        {
+                        "outFileOptions": "-vf fps=1/2",
+                        "outFileName": "beach_%04d.png"
+                        },
+                        {
+                        "outFileOptions": "-vcodec libx264 -crf 28 -preset ultrafast -c:a copy -s 720x1280",
+                        "outFileName": "beach_720p.mp4"
+                        }
+                    ]
+                }
+             """,
             """
                 {
                     "assetContianerName": "originals-de1885b94150-d6f6b9f9-f2eb-42cf-96c5-fe0be098fef3",
@@ -120,48 +119,47 @@ internal class Program
                         }
                     ]
                 }
-             """
-            //  ,
-            // """
-            //     {
-            //         "assetContianerName": "originals-de1885b94150-d6f6b9f9-f2eb-42cf-96c5-fe0be098fef3",
-            //         "assetId": "1e049c87-ce56-4c54-afc8-0c5a01a97bf3",
-            //         "originalAssetBlobName": "original",
-            //         "sourceStorageAccount": "cheuw001assetsstcool",
-            //         "destinationStorageAccount": "cheuw001assetssthot",
-            //         "outFilePrefix": "boatnewyork",
-            //         "commandArgs": [
-            //             {
-            //             "outFileOptions": "-vf fps=1/4",
-            //             "outFileName": "boatnewyork_%04d.png"
-            //             },
-            //             {
-            //             "outFileOptions": "-vcodec libx264 -crf 28 -preset ultrafast -c:a copy -s 1280x720",
-            //             "outFileName": "boatnewyork_720p.mp4"
-            //             }
-            //         ]
-            //     }
-            // """,
-            // """
-            //     {
-            //         "assetContianerName": "originals-de1885b94150-d6f6b9f9-f2eb-42cf-96c5-fe0be098fef3",
-            //         "assetId": "66403f95-2ded-496c-bb50-38713bbe2000",
-            //         "originalAssetBlobName": "original",
-            //         "sourceStorageAccount": "cheuw001assetsstcool",
-            //         "destinationStorageAccount": "cheuw001assetssthot",
-            //         "outFilePrefix": "waterstream",
-            //         "commandArgs": [
-            //             {
-            //             "outFileOptions": "-vf fps=1/2",
-            //             "outFileName": "waterstream_%04d.png"
-            //             },
-            //             {
-            //             "outFileOptions": "-vcodec libx264 -crf 28 -preset ultrafast -c:a copy -s 720x1280",
-            //             "outFileName": "waterstream_720p.mp4"
-            //             }
-            //         ]
-            //     }
-            // """
+             """,
+            """
+                {
+                    "assetContianerName": "originals-de1885b94150-d6f6b9f9-f2eb-42cf-96c5-fe0be098fef3",
+                    "assetId": "1e049c87-ce56-4c54-afc8-0c5a01a97bf3",
+                    "originalAssetBlobName": "original",
+                    "sourceStorageAccount": "cheuw001assetsstcool",
+                    "destinationStorageAccount": "cheuw001assetssthot",
+                    "outFilePrefix": "boatnewyork",
+                    "commandArgs": [
+                        {
+                        "outFileOptions": "-vf fps=1/4",
+                        "outFileName": "boatnewyork_%04d.png"
+                        },
+                        {
+                        "outFileOptions": "-vcodec libx264 -crf 28 -preset ultrafast -c:a copy -s 1280x720",
+                        "outFileName": "boatnewyork_720p.mp4"
+                        }
+                    ]
+                }
+            """,
+            """
+                {
+                    "assetContianerName": "originals-de1885b94150-d6f6b9f9-f2eb-42cf-96c5-fe0be098fef3",
+                    "assetId": "66403f95-2ded-496c-bb50-38713bbe2000",
+                    "originalAssetBlobName": "original",
+                    "sourceStorageAccount": "cheuw001assetsstcool",
+                    "destinationStorageAccount": "cheuw001assetssthot",
+                    "outFilePrefix": "waterstream",
+                    "commandArgs": [
+                        {
+                        "outFileOptions": "-vf fps=1/2",
+                        "outFileName": "waterstream_%04d.png"
+                        },
+                        {
+                        "outFileOptions": "-vcodec libx264 -crf 28 -preset ultrafast -c:a copy -s 720x1280",
+                        "outFileName": "waterstream_720p.mp4"
+                        }
+                    ]
+                }
+            """
         };
     }
 }
