@@ -2,13 +2,6 @@
 using Microsoft.Extensions.Logging;
 using common.lib.Configs;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Configuration;
-using Azure.Identity;
-using Azure.Messaging.EventHubs.Consumer;
-using Azure.Messaging.EventHubs.Processor;
-using Azure.Messaging.EventHubs;
-using Azure.Storage.Blobs;
-using System.Text;
 
 namespace videoprocessor.eventhub;
 

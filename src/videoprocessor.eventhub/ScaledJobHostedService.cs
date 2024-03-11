@@ -19,6 +19,7 @@ internal sealed class ScaledJobHostedService : BackgroundService
     private readonly IHostApplicationLifetime _applicationLifetime;
     private readonly IConfiguration _configuration;
     private readonly CancellationTokenSource _cancellationTokenSource;
+    private readonly EventProcessorClient _processor;
 
     private bool _terminateIntiated;
     private int _runningJobCount;
@@ -32,10 +33,6 @@ internal sealed class ScaledJobHostedService : BackgroundService
         _applicationLifetime = applicationLifetime;
         _configuration = configuration;
         _cancellationTokenSource = new CancellationTokenSource();
-    }
-
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    {
 
         string eventhubNamespace = _configuration["EventHubNamespaceName-1"];
         _logger.LogInformation($"Event handler job started for {eventhubNamespace}.");
@@ -50,23 +47,25 @@ internal sealed class ScaledJobHostedService : BackgroundService
         new Uri($"https://{_configuration["EventHubStorageName"]}.blob.core.windows.net/{EventHubConsumer}-{EventHubName}"),
         azureCredentials);
 
-        var processor = new EventProcessorClient(
+        _processor = new EventProcessorClient(
             storageClient,
             EventHubConsumer,
             $"{eventhubNamespace}.servicebus.windows.net",
             $"{EventHubName}",
             azureCredentials);
+    }
 
-
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
         // Register handlers for processing events and handling errors
-        processor.ProcessEventAsync += ProcessEventHandler;
-        processor.ProcessErrorAsync += ProcessErrorHandler;
+        _processor.ProcessEventAsync += ProcessEventHandler;
+        _processor.ProcessErrorAsync += ProcessErrorHandler;
         _terminateIntiated = false;
 
         try
         {
             // Start the processing
-            await processor.StartProcessingAsync();
+            await _processor.StartProcessingAsync(_cancellationTokenSource.Token);
 
             _logger.LogInformation($"Event handler job started for {EventHubConsumer}-{EventHubName} event processing...");
             await Task.Delay(Timeout.Infinite, _cancellationTokenSource.Token);
@@ -80,9 +79,9 @@ internal sealed class ScaledJobHostedService : BackgroundService
         {
             _logger.LogInformation("Event handler job terminating...");
             // Stop the processing
-            await processor.StopProcessingAsync();
-            processor.ProcessEventAsync -= ProcessEventHandler;
-            processor.ProcessErrorAsync -= ProcessErrorHandler;
+            await _processor.StopProcessingAsync();
+            _processor.ProcessEventAsync -= ProcessEventHandler;
+            _processor.ProcessErrorAsync -= ProcessErrorHandler;
             _logger.LogInformation("Event handler job terminated.");
 
             _cancellationTokenSource.Dispose();
@@ -126,6 +125,11 @@ internal sealed class ScaledJobHostedService : BackgroundService
 
     private async Task ProcessEventHandler(ProcessEventArgs eventArgs)
     {
+        if (eventArgs.CancellationToken.IsCancellationRequested)
+        {
+            return;
+        }
+
         _terminateIntiated = false;
         _runningJobCount++;
         _logger.LogInformation("Event handler job processing an event...");
