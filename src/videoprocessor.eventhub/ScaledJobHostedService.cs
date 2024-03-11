@@ -19,14 +19,16 @@ internal sealed class ScaledJobHostedService : BackgroundService
     private const string EventHubName = "videopreview";
     private const string EventHubConsumer = "videoprevieweventhandler";
     private const int TerminationGracePeriodSeconds = 60;
-    private const int EventProcessCheckIntervalSeconds = 5;
+    //private const int EventProcessCheckIntervalSeconds = 5;
 
     private readonly ILogger<ScaledJobHostedService> _logger;
     private readonly IHostApplicationLifetime _applicationLifetime;
     private readonly IConfiguration _configuration;
+    private readonly CancellationTokenSource _cancellationTokenSource;
 
     private bool _terminateIntiated;
-    private bool _continueProcessing;
+    private int _runningJobCount;
+    //private bool _continueProcessing;
 
     public ScaledJobHostedService(
         ILogger<ScaledJobHostedService> logger,
@@ -36,6 +38,7 @@ internal sealed class ScaledJobHostedService : BackgroundService
         _logger = logger;
         _applicationLifetime = applicationLifetime;
         _configuration = configuration;
+        _cancellationTokenSource = new CancellationTokenSource();
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -61,57 +64,102 @@ internal sealed class ScaledJobHostedService : BackgroundService
             $"{EventHubName}",
             azureCredentials);
 
-        
+
         // Register handlers for processing events and handling errors
         processor.ProcessEventAsync += ProcessEventHandler;
         processor.ProcessErrorAsync += ProcessErrorHandler;
-
-        // Start the processing
-        await processor.StartProcessingAsync();
-        _continueProcessing = true;
         _terminateIntiated = false;
 
-        while (_continueProcessing)
+        try
         {
+            // Start the processing
+            await processor.StartProcessingAsync();
+
+            //while (_continueProcessing)
+            //{
+            //    if (_terminateIntiated)
+            //    {
+            //        _continueProcessing = false;
+            //        _logger.LogInformation("Event handler job termination intiated...");
+            //        await Task.Delay(TimeSpan.FromSeconds(TerminationGracePeriodSeconds));
+            //    }
+            //    else
+            //    {
+            //        // Check event processing status
+            //        await Task.Delay(TimeSpan.FromSeconds(EventProcessCheckIntervalSeconds));
+            //        _logger.LogInformation($"Event handler job running...");
+            //    }
+            //}
+            _logger.LogInformation($"Event handler job started for {EventHubConsumer}-{EventHubName} event processing...");
+            await Task.Delay(Timeout.Infinite, _cancellationTokenSource.Token);
+
+        }
+        catch (TaskCanceledException)
+        {
+            // This is expected if the cancellation token is signaled.
+        }
+        finally
+        {
+            _logger.LogInformation("Event handler job terminating...");
+            // Stop the processing
+            await processor.StopProcessingAsync();
+            processor.ProcessEventAsync -= ProcessEventHandler;
+            processor.ProcessErrorAsync -= ProcessErrorHandler;
+            _logger.LogInformation("Event handler job terminated.");
+
+            _cancellationTokenSource.Dispose();
+            _applicationLifetime.StopApplication();
+        }
+    }
+
+    private async Task HandleTerminationAsync()
+    {
+        if (_runningJobCount > 0)
+        {
+            _logger.LogInformation($"Event handler job is not termnating due to {_runningJobCount} running events...");
+            return;
+        }
+
+        _terminateIntiated = true;
+        _logger.LogInformation("Event handler job termination Intiated...");
+        int secodsElapsed = 0;
+
+        while (_terminateIntiated && secodsElapsed < TerminationGracePeriodSeconds)
+        {
+            await Task.Delay(1000);
+            secodsElapsed++;
             if (_terminateIntiated)
             {
-                _continueProcessing = false;
-                _logger.LogInformation("Event handler job termination intiated...");
-                await Task.Delay(TimeSpan.FromSeconds(TerminationGracePeriodSeconds));
-            }
-            else
-            {
-                // Check event processing status
-                await Task.Delay(TimeSpan.FromSeconds(EventProcessCheckIntervalSeconds));
-                _logger.LogInformation($"Event handler job running...");
+                _logger.LogInformation($"Event handler job termination intiated. Elapsed {secodsElapsed} seconds out of {TerminationGracePeriodSeconds} ...");
             }
         }
 
-        // Stop the processing
-        await processor.StopProcessingAsync();
-        processor.ProcessEventAsync -= ProcessEventHandler;
-        processor.ProcessErrorAsync -= ProcessErrorHandler;
-        _logger.LogInformation("Event handler job terminated.");
-        
-        _applicationLifetime.StopApplication();
+        if (_terminateIntiated)
+        {
+            _logger.LogInformation("Event handler job termination grace period passed...");
+            await _cancellationTokenSource.CancelAsync();
+            _logger.LogInformation("Event handler job termination in progress...");
+        }
+        else
+        {
+            _logger.LogInformation("Event handler job termination aborted. Continue processing events...");
+        }
     }
 
     private async Task ProcessEventHandler(ProcessEventArgs eventArgs)
     {
-        if (_terminateIntiated)
-        {
-            _continueProcessing = true;
-            _terminateIntiated = false;
-            _logger.LogInformation("Event handler job termination cancelled...");
-        }
+        _terminateIntiated = false;
+        _runningJobCount++;
+        _logger.LogInformation("Event handler job processing an event...");
 
         // Write the body of the event to the console window
         await eventArgs.UpdateCheckpointAsync(); // update checkpoint so we mark the message is processed
         Console.WriteLine("\tReceived event: {0}", Encoding.UTF8.GetString(eventArgs.Data.Body.ToArray()));
         Console.WriteLine("Processing...");
-        Task.Delay(TimeSpan.FromSeconds(10)); // This where we call video process service to generate previews
+        await Task.Delay(TimeSpan.FromSeconds(10)); // This where we call video process service to generate previews
 
-        _terminateIntiated = true;
+        if (_runningJobCount > 0) { _runningJobCount--; }
+        HandleTerminationAsync();
     }
 
     private Task ProcessErrorHandler(ProcessErrorEventArgs eventArgs)
@@ -119,7 +167,6 @@ internal sealed class ScaledJobHostedService : BackgroundService
         // Write details about the error to the console window
         Console.WriteLine($"\tPartition '{eventArgs.PartitionId}': an unhandled exception was encountered. This was not expected to happen.");
         Console.WriteLine(eventArgs.Exception.Message);
-        _terminateIntiated = true;
         return Task.CompletedTask;
     }
 }
