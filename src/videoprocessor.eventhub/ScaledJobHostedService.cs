@@ -6,6 +6,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System.Text;
+using System.Text.Json;
+using videoprocessor.eventhub.Interfaces;
+using videoprocessor.eventhub.Models;
 
 namespace videoprocessor.eventhub;
 
@@ -14,25 +17,28 @@ internal sealed class ScaledJobHostedService : BackgroundService
     private const string EventHubName = "videopreview";
     private const string EventHubConsumer = "videoprevieweventhandler";
     private const int TerminationGracePeriodSeconds = 60;
-    
+
     private readonly ILogger<ScaledJobHostedService> _logger;
     private readonly IHostApplicationLifetime _applicationLifetime;
     private readonly IConfiguration _configuration;
     private readonly CancellationTokenSource _cancellationTokenSource;
     private readonly EventProcessorClient _processor;
+    private readonly IVideoTranscoder _videoTranscorder;
 
     private bool _terminateIntiated;
     private int _runningJobCount;
-    
+
     public ScaledJobHostedService(
         ILogger<ScaledJobHostedService> logger,
         IHostApplicationLifetime applicationLifetime,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        IVideoTranscoder videoTranscoder)
     {
         _logger = logger;
         _applicationLifetime = applicationLifetime;
         _configuration = configuration;
         _cancellationTokenSource = new CancellationTokenSource();
+        _videoTranscorder = videoTranscoder;
 
         string eventhubNamespace = _configuration["EventHubNamespaceName-1"];
         _logger.LogInformation($"Event handler job started for {eventhubNamespace}.");
@@ -58,8 +64,8 @@ internal sealed class ScaledJobHostedService : BackgroundService
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         // Register handlers for processing events and handling errors
-        _processor.ProcessEventAsync += ProcessEventHandler;
-        _processor.ProcessErrorAsync += ProcessErrorHandler;
+        _processor.ProcessEventAsync += VideoTranscordEventHandlerAsync;
+        _processor.ProcessErrorAsync += VideoTranscordEventErrorHandlerAsync;
         _terminateIntiated = false;
 
         try
@@ -80,8 +86,8 @@ internal sealed class ScaledJobHostedService : BackgroundService
             _logger.LogInformation("Event handler job terminating...");
             // Stop the processing
             await _processor.StopProcessingAsync();
-            _processor.ProcessEventAsync -= ProcessEventHandler;
-            _processor.ProcessErrorAsync -= ProcessErrorHandler;
+            _processor.ProcessEventAsync -= VideoTranscordEventHandlerAsync;
+            _processor.ProcessErrorAsync -= VideoTranscordEventErrorHandlerAsync;
             _logger.LogInformation("Event handler job terminated.");
 
             _cancellationTokenSource.Dispose();
@@ -89,7 +95,45 @@ internal sealed class ScaledJobHostedService : BackgroundService
         }
     }
 
-    private async Task HandleTerminationAsync()
+    private async Task VideoTranscordEventHandlerAsync(ProcessEventArgs eventArgs)
+    {
+        if (eventArgs.CancellationToken.IsCancellationRequested)
+        {
+            return;
+        }
+
+        _terminateIntiated = false;
+        _runningJobCount++;
+        _logger.LogInformation("Event handler job processing an event...");
+
+        // Write the body of the event to the console window
+        await eventArgs.UpdateCheckpointAsync(); // update checkpoint so we mark the message is processed
+        _logger.LogInformation("\tReceived event: {0}", Encoding.UTF8.GetString(eventArgs.Data.Body.ToArray()));
+        _logger.LogInformation("Processing...");
+
+        await _videoTranscorder.TranscodeAsync(
+            eventArgs.Data.EventBody.ToObjectFromJson<TranscodeMessage>(new JsonSerializerOptions()
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            }));
+
+        if (_runningJobCount > 0)
+        {
+            _runningJobCount--;
+        }
+
+        _ = JobTerminationHandlerAsync();
+    }
+
+    private Task VideoTranscordEventErrorHandlerAsync(ProcessErrorEventArgs eventArgs)
+    {
+        // Write details about the error to the console window
+        _logger.LogInformation($"\tPartition '{eventArgs.PartitionId}': an unhandled exception was encountered. This was not expected to happen.");
+        _logger.LogInformation(eventArgs.Exception.Message);
+        return Task.CompletedTask;
+    }
+
+    private async Task JobTerminationHandlerAsync()
     {
         if (_runningJobCount > 0)
         {
@@ -121,34 +165,5 @@ internal sealed class ScaledJobHostedService : BackgroundService
         {
             _logger.LogInformation("Event handler job termination aborted. Continue processing events...");
         }
-    }
-
-    private async Task ProcessEventHandler(ProcessEventArgs eventArgs)
-    {
-        if (eventArgs.CancellationToken.IsCancellationRequested)
-        {
-            return;
-        }
-
-        _terminateIntiated = false;
-        _runningJobCount++;
-        _logger.LogInformation("Event handler job processing an event...");
-
-        // Write the body of the event to the console window
-        await eventArgs.UpdateCheckpointAsync(); // update checkpoint so we mark the message is processed
-        _logger.LogInformation("\tReceived event: {0}", Encoding.UTF8.GetString(eventArgs.Data.Body.ToArray()));
-        _logger.LogInformation("Processing...");
-        await Task.Delay(TimeSpan.FromSeconds(10)); // This where we call video process service to generate previews
-
-        if (_runningJobCount > 0) { _runningJobCount--; }
-        HandleTerminationAsync();
-    }
-
-    private Task ProcessErrorHandler(ProcessErrorEventArgs eventArgs)
-    {
-        // Write details about the error to the console window
-        _logger.LogInformation($"\tPartition '{eventArgs.PartitionId}': an unhandled exception was encountered. This was not expected to happen.");
-        _logger.LogInformation(eventArgs.Exception.Message);
-        return Task.CompletedTask;
     }
 }

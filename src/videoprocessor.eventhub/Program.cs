@@ -2,6 +2,8 @@
 using Microsoft.Extensions.Logging;
 using common.lib.Configs;
 using Microsoft.Extensions.DependencyInjection;
+using videoprocessor.eventhub.Interfaces;
+using videoprocessor.eventhub.Services;
 
 namespace videoprocessor.eventhub;
 
@@ -25,7 +27,9 @@ internal class Program
             })
             .ConfigureServices((_, services) =>
             {
-                services.AddHostedService<ScaledJobHostedService>();
+                services
+                .AddScoped<IVideoTranscoder, VideoTranscoder>()
+                .AddHostedService<ScaledJobHostedService>();
             })
             .ConfigureLogging((_, logging) =>
             {
