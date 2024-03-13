@@ -68,7 +68,7 @@ internal class Program
                     "sourceStorageAccount": "cheuw001assetsstcool",
                     "destinationStorageAccount": "cheuw001assetssthot",
                     "outFilePrefix": "walk",
-                    "commandArgs": [
+                    "outCommandArgs": [
                         {
                         "outFileOptions": "-vf fps=1/4",
                         "outFileName": "walk_%04d.png"
@@ -88,7 +88,7 @@ internal class Program
                     "sourceStorageAccount": "cheuw001assetsstcool",
                     "destinationStorageAccount": "cheuw001assetssthot",
                     "outFilePrefix": "beach",
-                    "commandArgs": [
+                    "outCommandArgs": [
                         {
                         "outFileOptions": "-vf fps=1/2",
                         "outFileName": "beach_%04d.png"
@@ -108,7 +108,7 @@ internal class Program
                     "sourceStorageAccount": "cheuw001assetsstcool",
                     "destinationStorageAccount": "cheuw001assetssthot",
                     "outFilePrefix": "friendseating",
-                    "commandArgs": [
+                    "outCommandArgs": [
                         {
                         "outFileOptions": "-vf fps=1/4",
                         "outFileName": "friendseating_%04d.png"
@@ -128,7 +128,7 @@ internal class Program
                     "sourceStorageAccount": "cheuw001assetsstcool",
                     "destinationStorageAccount": "cheuw001assetssthot",
                     "outFilePrefix": "boatnewyork",
-                    "commandArgs": [
+                    "outCommandArgs": [
                         {
                         "outFileOptions": "-vf fps=1/4",
                         "outFileName": "boatnewyork_%04d.png"
@@ -148,7 +148,7 @@ internal class Program
                     "sourceStorageAccount": "cheuw001assetsstcool",
                     "destinationStorageAccount": "cheuw001assetssthot",
                     "outFilePrefix": "waterstream",
-                    "commandArgs": [
+                    "outCommandArgs": [
                         {
                         "outFileOptions": "-vf fps=1/2",
                         "outFileName": "waterstream_%04d.png"
