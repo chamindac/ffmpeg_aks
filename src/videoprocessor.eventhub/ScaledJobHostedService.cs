@@ -24,8 +24,7 @@ internal sealed class ScaledJobHostedService : BackgroundService
     private readonly CancellationTokenSource _cancellationTokenSource;
     private readonly IVideoTranscoder _videoTranscorder;
 
-    private bool _terminateIntiated;
-    private int _runningJobCount;
+    private int _processingEventCount;
 
     public ScaledJobHostedService(
         ILogger<ScaledJobHostedService> logger,
@@ -43,7 +42,7 @@ internal sealed class ScaledJobHostedService : BackgroundService
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         string eventhubNamespace = _configuration["EventHubNamespaceName-1"];
-        _logger.LogInformation($"Event handler job started for {eventhubNamespace}.");
+        _logger.LogInformation($"Scaled job started for {eventhubNamespace}.");
 
         DefaultAzureCredential azureCredentials = new DefaultAzureCredential(
                 new DefaultAzureCredentialOptions
@@ -65,14 +64,14 @@ internal sealed class ScaledJobHostedService : BackgroundService
         // Register handlers for processing events and handling errors
         eventProcessorClient.ProcessEventAsync += VideoTranscordEventHandlerAsync;
         eventProcessorClient.ProcessErrorAsync += VideoTranscordEventErrorHandlerAsync;
-        _terminateIntiated = false;
+        _processingEventCount = 0;
 
         try
         {
             // Start the processing
             await eventProcessorClient.StartProcessingAsync(_cancellationTokenSource.Token);
 
-            _logger.LogInformation($"Event handler job started for {EventHubConsumer}-{EventHubName} event processing...");
+            _logger.LogInformation($"Scaled job started for {EventHubConsumer}-{EventHubName} event processing...");
             await Task.Delay(Timeout.Infinite, _cancellationTokenSource.Token);
 
         }
@@ -82,12 +81,12 @@ internal sealed class ScaledJobHostedService : BackgroundService
         }
         finally
         {
-            _logger.LogInformation("Event handler job terminating...");
+            _logger.LogInformation("Scaled job terminating...");
             // Stop the processing
             await eventProcessorClient.StopProcessingAsync();
             eventProcessorClient.ProcessEventAsync -= VideoTranscordEventHandlerAsync;
             eventProcessorClient.ProcessErrorAsync -= VideoTranscordEventErrorHandlerAsync;
-            _logger.LogInformation("Event handler job terminated.");
+            _logger.LogInformation("Scaled job terminated.");
 
             _cancellationTokenSource.Dispose();
             _applicationLifetime.StopApplication();
@@ -101,9 +100,8 @@ internal sealed class ScaledJobHostedService : BackgroundService
             return;
         }
 
-        _terminateIntiated = false;
-        _runningJobCount++;
-        _logger.LogInformation("Event handler job processing an event...");
+        _processingEventCount++;
+        _logger.LogInformation("Scaled job processing an event...");
 
         // Write the body of the event to the console window
         await eventArgs.UpdateCheckpointAsync(); // update checkpoint so we mark the message is processed
@@ -116,9 +114,9 @@ internal sealed class ScaledJobHostedService : BackgroundService
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase
             }));
 
-        if (_runningJobCount > 0)
+        if (_processingEventCount > 0)
         {
-            _runningJobCount--;
+            _processingEventCount--;
         }
 
         _ = JobTerminationHandlerAsync();
@@ -134,35 +132,34 @@ internal sealed class ScaledJobHostedService : BackgroundService
 
     private async Task JobTerminationHandlerAsync()
     {
-        if (_runningJobCount > 0)
+        if (_processingEventCount > 0)
         {
-            _logger.LogInformation($"Event handler job is not termnating due to {_runningJobCount} running events...");
+            _logger.LogInformation($"Scaled job is not termnating due to {_processingEventCount} processing events...");
             return;
         }
 
-        _terminateIntiated = true;
-        _logger.LogInformation("Event handler job termination Intiated...");
+        _logger.LogInformation("Scaled job termination Intiated...");
         int secodsElapsed = 0;
 
-        while (_terminateIntiated && secodsElapsed < TerminationGracePeriodSeconds)
+        while (_processingEventCount == 0 && secodsElapsed < TerminationGracePeriodSeconds)
         {
             await Task.Delay(1000);
             secodsElapsed++;
-            if (_terminateIntiated)
+            if (_processingEventCount == 0)
             {
-                _logger.LogInformation($"Event handler job termination intiated. Elapsed {secodsElapsed} seconds out of {TerminationGracePeriodSeconds} ...");
+                _logger.LogInformation($"Scaled job termination intiated. Elapsed {secodsElapsed} seconds out of {TerminationGracePeriodSeconds} ...");
             }
         }
 
-        if (_terminateIntiated)
+        if (_processingEventCount == 0)
         {
-            _logger.LogInformation("Event handler job termination grace period passed...");
+            _logger.LogInformation("Scaled job termination grace period passed...");
             await _cancellationTokenSource.CancelAsync();
-            _logger.LogInformation("Event handler job termination in progress...");
+            _logger.LogInformation("Scaled job termination in progress...");
         }
         else
         {
-            _logger.LogInformation("Event handler job termination aborted. Continue processing events...");
+            _logger.LogInformation("Scaled job termination aborted. Continue processing events...");
         }
     }
 }

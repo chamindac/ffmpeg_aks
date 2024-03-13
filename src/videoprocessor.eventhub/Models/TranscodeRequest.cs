@@ -12,6 +12,6 @@ namespace videoprocessor.eventhub.Models
         public required string AssetId { get; set; }
         public required string OriginalAssetBlobName { get; set; }
         public required string OutFilePrefix { get; set; }
-        public List<TranscodeRequestOutCommandArgs>? OutCommandArgs { get; set; }
+        public List<TranscodeRequestCommandArgs>? CommandArgs { get; set; }
     }
 }

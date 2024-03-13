@@ -67,8 +67,9 @@ internal class Program
                     "originalAssetBlobName": "original",
                     "sourceStorageAccount": "cheuw001assetsstcool",
                     "destinationStorageAccount": "cheuw001assetssthot",
-                    "outFilePrefix": "walk",
-                    "outCommandArgs": [
+                    "outFilePrefix": "walk"
+                    ,
+                    "commandArgs": [
                         {
                         "outFileOptions": "-vf fps=1/4",
                         "outFileName": "walk_%04d.png"
@@ -88,7 +89,7 @@ internal class Program
                     "sourceStorageAccount": "cheuw001assetsstcool",
                     "destinationStorageAccount": "cheuw001assetssthot",
                     "outFilePrefix": "beach",
-                    "outCommandArgs": [
+                    "commandArgs": [
                         {
                         "outFileOptions": "-vf fps=1/2",
                         "outFileName": "beach_%04d.png"
@@ -108,7 +109,7 @@ internal class Program
                     "sourceStorageAccount": "cheuw001assetsstcool",
                     "destinationStorageAccount": "cheuw001assetssthot",
                     "outFilePrefix": "friendseating",
-                    "outCommandArgs": [
+                    "commandArgs": [
                         {
                         "outFileOptions": "-vf fps=1/4",
                         "outFileName": "friendseating_%04d.png"
@@ -128,7 +129,7 @@ internal class Program
                     "sourceStorageAccount": "cheuw001assetsstcool",
                     "destinationStorageAccount": "cheuw001assetssthot",
                     "outFilePrefix": "boatnewyork",
-                    "outCommandArgs": [
+                    "commandArgs": [
                         {
                         "outFileOptions": "-vf fps=1/4",
                         "outFileName": "boatnewyork_%04d.png"
@@ -148,7 +149,7 @@ internal class Program
                     "sourceStorageAccount": "cheuw001assetsstcool",
                     "destinationStorageAccount": "cheuw001assetssthot",
                     "outFilePrefix": "waterstream",
-                    "outCommandArgs": [
+                    "commandArgs": [
                         {
                         "outFileOptions": "-vf fps=1/2",
                         "outFileName": "waterstream_%04d.png"
