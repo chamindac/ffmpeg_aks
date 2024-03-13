@@ -22,7 +22,6 @@ internal sealed class ScaledJobHostedService : BackgroundService
     private readonly IHostApplicationLifetime _applicationLifetime;
     private readonly IConfiguration _configuration;
     private readonly CancellationTokenSource _cancellationTokenSource;
-    private readonly EventProcessorClient _processor;
     private readonly IVideoTranscoder _videoTranscorder;
 
     private bool _terminateIntiated;
@@ -37,9 +36,12 @@ internal sealed class ScaledJobHostedService : BackgroundService
         _logger = logger;
         _applicationLifetime = applicationLifetime;
         _configuration = configuration;
-        _cancellationTokenSource = new CancellationTokenSource();
         _videoTranscorder = videoTranscoder;
+        _cancellationTokenSource = new CancellationTokenSource();
+    }
 
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
         string eventhubNamespace = _configuration["EventHubNamespaceName-1"];
         _logger.LogInformation($"Event handler job started for {eventhubNamespace}.");
 
@@ -49,29 +51,26 @@ internal sealed class ScaledJobHostedService : BackgroundService
                     TenantId = _configuration["AadTenantId"]
                 });
 
-        BlobContainerClient storageClient = new BlobContainerClient(
+        BlobContainerClient storageClient = new (
         new Uri($"https://{_configuration["EventHubStorageName"]}.blob.core.windows.net/{EventHubConsumer}-{EventHubName}"),
         azureCredentials);
 
-        _processor = new EventProcessorClient(
+        EventProcessorClient eventProcessorClient = new (
             storageClient,
             EventHubConsumer,
             $"{eventhubNamespace}.servicebus.windows.net",
             $"{EventHubName}",
             azureCredentials);
-    }
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    {
         // Register handlers for processing events and handling errors
-        _processor.ProcessEventAsync += VideoTranscordEventHandlerAsync;
-        _processor.ProcessErrorAsync += VideoTranscordEventErrorHandlerAsync;
+        eventProcessorClient.ProcessEventAsync += VideoTranscordEventHandlerAsync;
+        eventProcessorClient.ProcessErrorAsync += VideoTranscordEventErrorHandlerAsync;
         _terminateIntiated = false;
 
         try
         {
             // Start the processing
-            await _processor.StartProcessingAsync(_cancellationTokenSource.Token);
+            await eventProcessorClient.StartProcessingAsync(_cancellationTokenSource.Token);
 
             _logger.LogInformation($"Event handler job started for {EventHubConsumer}-{EventHubName} event processing...");
             await Task.Delay(Timeout.Infinite, _cancellationTokenSource.Token);
@@ -85,9 +84,9 @@ internal sealed class ScaledJobHostedService : BackgroundService
         {
             _logger.LogInformation("Event handler job terminating...");
             // Stop the processing
-            await _processor.StopProcessingAsync();
-            _processor.ProcessEventAsync -= VideoTranscordEventHandlerAsync;
-            _processor.ProcessErrorAsync -= VideoTranscordEventErrorHandlerAsync;
+            await eventProcessorClient.StopProcessingAsync();
+            eventProcessorClient.ProcessEventAsync -= VideoTranscordEventHandlerAsync;
+            eventProcessorClient.ProcessErrorAsync -= VideoTranscordEventErrorHandlerAsync;
             _logger.LogInformation("Event handler job terminated.");
 
             _cancellationTokenSource.Dispose();
