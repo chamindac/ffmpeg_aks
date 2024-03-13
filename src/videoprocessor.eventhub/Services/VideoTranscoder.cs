@@ -20,7 +20,7 @@ namespace videoprocessor.eventhub.Services
             _logger = logger;
         }
 
-        public async Task TranscodeAsync(TranscodeMessage transcodeMessage)
+        public async Task TranscodeAsync(TranscodeRequest transcodeMessage)
         {
             _logger.LogInformation($"Transcoding {transcodeMessage.AssetId} as {transcodeMessage.OutFilePrefix}");
             // TODO: to be implemented

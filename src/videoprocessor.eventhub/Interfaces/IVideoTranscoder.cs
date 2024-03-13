@@ -10,6 +10,6 @@ namespace videoprocessor.eventhub.Interfaces
 {
     internal interface IVideoTranscoder
     {
-        Task TranscodeAsync(TranscodeMessage transcodeMessage);
+        Task TranscodeAsync(TranscodeRequest transcodeMessage);
     }
 }

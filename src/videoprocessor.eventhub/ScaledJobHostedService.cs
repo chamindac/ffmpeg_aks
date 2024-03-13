@@ -112,7 +112,7 @@ internal sealed class ScaledJobHostedService : BackgroundService
         _logger.LogInformation("Processing...");
 
         await _videoTranscorder.TranscodeAsync(
-            eventArgs.Data.EventBody.ToObjectFromJson<TranscodeMessage>(new JsonSerializerOptions()
+            eventArgs.Data.EventBody.ToObjectFromJson<TranscodeRequest>(new JsonSerializerOptions()
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase
             }));

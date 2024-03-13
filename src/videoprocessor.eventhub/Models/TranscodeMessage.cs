@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace videoprocessor.eventhub.Models
 {
-    public class TranscodeMessage
+    public class TranscodeRequest
     {
         public required string AssetContianerName { get; set; }
         public required string AssetId { get; set; }
