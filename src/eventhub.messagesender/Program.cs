@@ -62,7 +62,7 @@ internal class Program
         {
             """
                 {
-                    "assetContianerName": "originals-de1885b94150-d6f6b9f9-f2eb-42cf-96c5-fe0be098fef3",
+                    "assetContainerName": "originals-de1885b94150-d6f6b9f9-f2eb-42cf-96c5-fe0be098fef3",
                     "assetId": "bb5ab2dd-f89c-4689-976b-0de2fce614ec",
                     "originalAssetBlobName": "original",
                     "sourceStorageAccount": "cheuw001assetsstcool",
@@ -83,7 +83,7 @@ internal class Program
              """,
             """
                 {
-                    "assetContianerName": "originals-de1885b94150-d6f6b9f9-f2eb-42cf-96c5-fe0be098fef3",
+                    "assetContainerName": "originals-de1885b94150-d6f6b9f9-f2eb-42cf-96c5-fe0be098fef3",
                     "assetId": "227ac968-7f98-41b5-806c-cd966f41128c",
                     "originalAssetBlobName": "original",
                     "sourceStorageAccount": "cheuw001assetsstcool",
@@ -103,7 +103,7 @@ internal class Program
              """,
             """
                 {
-                    "assetContianerName": "originals-de1885b94150-d6f6b9f9-f2eb-42cf-96c5-fe0be098fef3",
+                    "assetContainerName": "originals-de1885b94150-d6f6b9f9-f2eb-42cf-96c5-fe0be098fef3",
                     "assetId": "a3a45e98-a2ce-4b37-84ab-3fbd1cae624f",
                     "originalAssetBlobName": "original",
                     "sourceStorageAccount": "cheuw001assetsstcool",
@@ -123,7 +123,7 @@ internal class Program
              """,
             """
                 {
-                    "assetContianerName": "originals-de1885b94150-d6f6b9f9-f2eb-42cf-96c5-fe0be098fef3",
+                    "assetContainerName": "originals-de1885b94150-d6f6b9f9-f2eb-42cf-96c5-fe0be098fef3",
                     "assetId": "1e049c87-ce56-4c54-afc8-0c5a01a97bf3",
                     "originalAssetBlobName": "original",
                     "sourceStorageAccount": "cheuw001assetsstcool",
@@ -143,7 +143,7 @@ internal class Program
             """,
             """
                 {
-                    "assetContianerName": "originals-de1885b94150-d6f6b9f9-f2eb-42cf-96c5-fe0be098fef3",
+                    "assetContainerName": "originals-de1885b94150-d6f6b9f9-f2eb-42cf-96c5-fe0be098fef3",
                     "assetId": "66403f95-2ded-496c-bb50-38713bbe2000",
                     "originalAssetBlobName": "original",
                     "sourceStorageAccount": "cheuw001assetsstcool",

@@ -35,7 +35,7 @@ docker push chdemosharedacr.azurecr.io/media/chmediaservice:1.1
 For this you need an asset (video) uploaded in cheuw001assetsstcool with below specified blob container having a folder named with assetId. The asset name set as original.
 
 {
-    "assetContianerName": "originals-de1885b94150-d6f6b9f9-f2eb-42cf-96c5-fe0be098fef3",
+    "assetContainerName": "originals-de1885b94150-d6f6b9f9-f2eb-42cf-96c5-fe0be098fef3",
     "assetId":  "bb5ab2dd-f89c-4689-976b-0de2fce614ec",
     "originalAssetBlobName": "original",
     "sourceStorageAccount": "cheuw001assetsstcool",
@@ -110,7 +110,7 @@ messageContent=$(yq --input-format xml -op ".QueueMessagesList.QueueMessage.Mess
 
 echo $messageContent > $messageFileId.json
 
-jq -r ".assetContianerName" "$messageFileId.json"
+jq -r ".assetContainerName" "$messageFileId.json"
 jq -r ".assetId" "$messageFileId.json"
 jq -r ".originalAssetBlobName" "$messageFileId.json"
 jq -r ".sourceStorageAccount" "$messageFileId.json"
@@ -129,7 +129,7 @@ yq --input-format json -op ".commandArgs | length" "$messageFileId.json"
 yq --input-format json -op ".commandArgs.$i.outFileOptions" "$messageFileId.json"
 
 ### getting message contents to variables
-assetContianerName=$(jq -r ".assetContianerName" "$messageFileId.json")
+assetContainerName=$(jq -r ".assetContainerName" "$messageFileId.json")
 assetId=$(jq -r ".assetId" "$messageFileId.json")
 originalAssetBlobName=$(jq -r ".originalAssetBlobName" "$messageFileId.json")
 sourceStorageAccount=$(jq -r ".sourceStorageAccount" "$messageFileId.json")
@@ -143,7 +143,7 @@ mkdir $assetId
 cd $assetId
 mkdir $generatedDirName
 
-az storage blob download --auth-mode login --max-connections 5 --blob-url https://$sourceStorageAccount.blob.core.windows.net/$assetContianerName/$assetId/$originalAssetBlobName -f $assetId
+az storage blob download --auth-mode login --max-connections 5 --blob-url https://$sourceStorageAccount.blob.core.windows.net/$assetContainerName/$assetId/$originalAssetBlobName -f $assetId
 
 echo $commandCount
 
@@ -176,12 +176,12 @@ $(($(stat --format=%s original)/1048576))
 
 $(du -h original)
 
-messageContent='{ "assetContianerName": "originals-de1885b94150-d6f6b9f9-f2eb-42cf-96c5-fe0be098fef3", "assetId": "bb5ab2dd-f89c-4689-976b-0de2fce614ec", "originalAssetBlobName": "original", "sourceStorageAccount": "cheuw001assetsstcool", "destinationStorageAccount": "cheuw001assetssthot", "commandArgs": [ { "inFileOptions": "-vf fps=1/4", "outFileName": "walk_%04d.png" }, { "inFileOptions": "-vcodec libx264 -crf 28 -preset ultrafast -c:a copy -s 1280x720", "outFileName": "walk_720p.mp4" } ] }'
+messageContent='{ "assetContainerName": "originals-de1885b94150-d6f6b9f9-f2eb-42cf-96c5-fe0be098fef3", "assetId": "bb5ab2dd-f89c-4689-976b-0de2fce614ec", "originalAssetBlobName": "original", "sourceStorageAccount": "cheuw001assetsstcool", "destinationStorageAccount": "cheuw001assetssthot", "commandArgs": [ { "inFileOptions": "-vf fps=1/4", "outFileName": "walk_%04d.png" }, { "inFileOptions": "-vcodec libx264 -crf 28 -preset ultrafast -c:a copy -s 1280x720", "outFileName": "walk_720p.mp4" } ] }'
 
-echo $messageContent | jq -r ".assetContianerName"
+echo $messageContent | jq -r ".assetContainerName"
 echo $messageContent | jq -r ".commandArgs | length"
 
-queueMessage='<?xml version="1.0" encoding="utf-8"?><QueueMessagesList><QueueMessage><MessageId>d1d1469b-ca41-4500-82ac-23ff1d0e8167</MessageId><InsertionTime>Sun, 05 Nov 2023 18:11:40 GMT</InsertionTime><ExpirationTime>Sun, 12 Nov 2023 18:11:40 GMT</ExpirationTime><PopReceipt>AgAAAAMAAAAAAAAAZMcOzMQQ2gE=</PopReceipt><TimeNextVisible>Mon, 06 Nov 2023 15:20:38 GMT</TimeNextVisible><DequeueCount>15</DequeueCount><MessageText>{ "assetContianerName": "originals-de1885b94150-d6f6b9f9-f2eb-42cf-96c5-fe0be098fef3", "assetId": "bb5ab2dd-f89c-4689-976b-0de2fce614ec", "originalAssetBlobName": "original", "sourceStorageAccount": "cheuw001assetsstcool", "destinationStorageAccount": "cheuw001assetssthot", "commandArgs": [ { "inFileOptions": "-vf fps=1/4", "outFileName": "walk_%04d.png" }, { "inFileOptions": "-vcodec libx264 -crf 28 -preset ultrafast -c:a copy -s 1280x720", "outFileName": "walk_720p.mp4" } ] }</MessageText></QueueMessage></QueueMessagesList>'
+queueMessage='<?xml version="1.0" encoding="utf-8"?><QueueMessagesList><QueueMessage><MessageId>d1d1469b-ca41-4500-82ac-23ff1d0e8167</MessageId><InsertionTime>Sun, 05 Nov 2023 18:11:40 GMT</InsertionTime><ExpirationTime>Sun, 12 Nov 2023 18:11:40 GMT</ExpirationTime><PopReceipt>AgAAAAMAAAAAAAAAZMcOzMQQ2gE=</PopReceipt><TimeNextVisible>Mon, 06 Nov 2023 15:20:38 GMT</TimeNextVisible><DequeueCount>15</DequeueCount><MessageText>{ "assetContainerName": "originals-de1885b94150-d6f6b9f9-f2eb-42cf-96c5-fe0be098fef3", "assetId": "bb5ab2dd-f89c-4689-976b-0de2fce614ec", "originalAssetBlobName": "original", "sourceStorageAccount": "cheuw001assetsstcool", "destinationStorageAccount": "cheuw001assetssthot", "commandArgs": [ { "inFileOptions": "-vf fps=1/4", "outFileName": "walk_%04d.png" }, { "inFileOptions": "-vcodec libx264 -crf 28 -preset ultrafast -c:a copy -s 1280x720", "outFileName": "walk_720p.mp4" } ] }</MessageText></QueueMessage></QueueMessagesList>'
 
 echo $queueMessage
 

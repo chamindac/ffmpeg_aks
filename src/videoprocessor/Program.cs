@@ -61,7 +61,7 @@ class Program
         //    AssetMessage assetMessage = JsonSerializer.Deserialize<AssetMessage>(message.Body.ToString(), serializeOptions)
         //        ?? new()
         //        {
-        //            AssetContianerName = string.Empty,
+        //            AssetContainerName = string.Empty,
         //            AssetId = string.Empty,
         //            OriginalAssetBlobName = string.Empty,
         //            OutFilePrefix = string.Empty
@@ -69,14 +69,14 @@ class Program
 
         //    // Create video download folder
         //    Console.WriteLine($"Video Asset Id: {assetMessage.AssetId}");
-        //    Console.WriteLine($"Video Asset Container Name: {assetMessage.AssetContianerName}");
+        //    Console.WriteLine($"Video Asset Container Name: {assetMessage.AssetContainerName}");
         //    string assetFolderPath = Path.Combine(mediaPath, assetMessage.AssetId);
 
         //    try
         //    {
         //        // Download original video file
         //        Stopwatch downloadTimer = Stopwatch.StartNew();
-        //        string assetPath = await DownloadOrginalAsset(assetMessage.AssetContianerName,
+        //        string assetPath = await DownloadOrginalAsset(assetMessage.assetContainerName,
         //            assetFolderPath,
         //            assetMessage.AssetId,
         //            assetMessage.OriginalAssetBlobName);

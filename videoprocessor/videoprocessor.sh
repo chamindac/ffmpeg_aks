@@ -39,7 +39,7 @@ then
     echo $messageContent
     echo "--------------------------------------------"
 
-    assetContianerName=$(echo $messageContent | jq -r ".assetContianerName")
+    assetContainerName=$(echo $messageContent | jq -r ".assetContainerName")
     assetId=$(echo $messageContent | jq -r ".assetId")
     originalAssetBlobName=$(echo $messageContent | jq -r ".originalAssetBlobName")
     sourceStorageAccount=$(echo $messageContent | jq -r ".sourceStorageAccount")
@@ -52,7 +52,7 @@ then
     
     { # try
         downloadStarted=$(date '+%s')
-        az storage blob download --auth-mode login --max-connections 5 --blob-url https://$sourceStorageAccount.blob.core.windows.net/$assetContianerName/$assetId/$originalAssetBlobName -f $assetId
+        az storage blob download --auth-mode login --max-connections 5 --blob-url https://$sourceStorageAccount.blob.core.windows.net/$assetContainerName/$assetId/$originalAssetBlobName -f $assetId
         
         assetSize=$(du -h)
         mkdir $generatedDirName

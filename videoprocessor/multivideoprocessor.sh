@@ -30,7 +30,7 @@ ls -l
 
 #ffmpeg -i "https://cheuw001assetsstcool.blob.core.windows.net/originals-de1885b94150-d6f6b9f9-f2eb-42cf-96c5-fe0be098fef3/bb5ab2dd-f89c-4689-976b-0de2fce614ec/original?se=2023-10-31T16%3A13Z&sp=r&spr=https&sv=2022-11-02&sr=c&sig=BmgfTMe1MzmFP2Nh1zkYHGhnHAceyW6fXG0csHX%2Bqd4%3D" -vf fps=1/4 generated/walk_%04d.png
 
-# assetContianerName="originals-de1885b94150-d6f6b9f9-f2eb-42cf-96c5-fe0be098fef3"
+# assetContainerName="originals-de1885b94150-d6f6b9f9-f2eb-42cf-96c5-fe0be098fef3"
 # assetId="bb5ab2dd-f89c-4689-976b-0de2fce614ec"
 # assetNamePrefix="walk_"
 # originalAssetBlobName="original"
@@ -41,7 +41,7 @@ ls -l
 # mkdir $assetId
 # cd $assetId
 # mkdir $generatedDirName
-# az storage blob download --auth-mode login --max-connections 5 --blob-url https://$sourceStorageAccount.blob.core.windows.net/$assetContianerName/$assetId/$originalAssetBlobName -f $assetId
+# az storage blob download --auth-mode login --max-connections 5 --blob-url https://$sourceStorageAccount.blob.core.windows.net/$assetContainerName/$assetId/$originalAssetBlobName -f $assetId
 # ffmpeg -i $assetId -vf fps=1/4 $generatedDirName/$assetNamePrefix%04d.png
 # ffmpeg -i $assetId -vcodec libx264 -crf 28 -preset ultrafast -c:a copy -s 1280x720 $generatedDirName/"$assetNamePrefix"720p.mp4
 # az storage container create --auth-mode login --account-name $destinationStorageAccount --name video-$assetId
@@ -91,7 +91,7 @@ do
         echo $messageContent
         echo "--------------------------------------------"
 
-        assetContianerName=$(echo $messageContent | jq -r ".assetContianerName")
+        assetContainerName=$(echo $messageContent | jq -r ".assetContainerName")
         assetId=$(echo $messageContent | jq -r ".assetId")
         originalAssetBlobName=$(echo $messageContent | jq -r ".originalAssetBlobName")
         sourceStorageAccount=$(echo $messageContent | jq -r ".sourceStorageAccount")
@@ -104,7 +104,7 @@ do
         
         { # try
             downloadStarted=$(date '+%s')
-            az storage blob download --auth-mode login --max-connections 5 --blob-url https://$sourceStorageAccount.blob.core.windows.net/$assetContianerName/$assetId/$originalAssetBlobName -f $assetId
+            az storage blob download --auth-mode login --max-connections 5 --blob-url https://$sourceStorageAccount.blob.core.windows.net/$assetContainerName/$assetId/$originalAssetBlobName -f $assetId
             
             assetSize=$(du -h)
             mkdir $generatedDirName
