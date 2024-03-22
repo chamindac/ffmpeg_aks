@@ -29,7 +29,7 @@ internal class Program
             {
                 services
                 .AddScoped<IVideoTranscoder, VideoTranscoder>()
-                .AddHostedService<ScaledJobHostedService>();
+                .AddHostedService<VideoProcessorHostedService>();
             })
             .ConfigureLogging((_, logging) =>
             {
