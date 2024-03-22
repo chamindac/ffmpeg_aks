@@ -120,3 +120,20 @@ spec:
     #   authenticationRef:
     #     name: video-processor-queue-auth
     #--------------
+
+    #--------------
+    # Below is how the event hub is used as trigger
+    #--------------
+    # - type: azure-eventhub
+    #   metadata:
+    #     unprocessedEventThreshold: "2"
+    #     activationUnprocessedEventThreshold: "0" 
+    #     eventHubNamespace: fw-av-dev-euw-001-2-green
+    #     eventHubName: videogenerationrequired
+    #     consumerGroup: videogenerator
+    #     storageAccountName: fwavdeveuw001ehngreen
+    #     blobContainer: videogenerator-videogenerationrequired
+    #     checkpointStrategy: blobMetadata
+    #   authenticationRef:
+    #     name: av-keda-trigger-auth
+    #--------------
