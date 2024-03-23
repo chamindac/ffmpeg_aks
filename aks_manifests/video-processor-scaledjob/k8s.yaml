@@ -105,4 +105,4 @@ spec:
         queueLength: '1'
         # activationQueueLength: '50'
       authenticationRef:
-        name: video-processor-queue-auth
+        name: demo-keda-auth

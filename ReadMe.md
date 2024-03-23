@@ -6,5 +6,7 @@ A video processor implementation with ffmpeg to run on AKS is available in this 
 Terraform code in /iac folder will enable creating the necessary infrastructure, which includes below resources.
 - AKS
 - Storage Queue
+- Azure Service Bus
+- Azure Event Hubs
 
 to be updated later...

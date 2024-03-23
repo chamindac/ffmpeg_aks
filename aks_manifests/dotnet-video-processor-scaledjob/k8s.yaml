@@ -107,7 +107,7 @@ spec:
         namespace: ch-video-dev-euw-001-sbus-blue
         messageCount: "1"
       authenticationRef:
-        name: video-processor-queue-auth
+        name: demo-keda-auth
     #--------------
     # Below is how the storage queue is used as trigger
     #--------------
@@ -118,7 +118,7 @@ spec:
     #     accountName: chvideodeveuw001queuest # storage-account-name
     #     # activationQueueLength: '50'
     #   authenticationRef:
-    #     name: video-processor-queue-auth
+    #     name: demo-keda-auth
     #--------------
 
     #--------------
@@ -135,5 +135,5 @@ spec:
     #     blobContainer: videogenerator-videogenerationrequired
     #     checkpointStrategy: blobMetadata
     #   authenticationRef:
-    #     name: av-keda-trigger-auth
+    #     name: demo-keda-auth
     #--------------

@@ -14,7 +14,7 @@
 apiVersion: keda.sh/v1alpha1
 kind: TriggerAuthentication
 metadata:
-  name: video-processor-queue-auth
+  name: demo-keda-auth
   namespace: media
 spec:
   podIdentity:
