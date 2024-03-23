@@ -191,3 +191,44 @@ metadata:
     azure.workload.identity/tenant-id: ${tenantid}$ # "${tenantid}$"
   name: keda-operator # Referred by AKS user assigned identity federated credential
   namespace: keda
+
+---
+# HPA for video-processor-eh
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: video-processor-eh-hpa
+  namespace: media
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: video-processor-eh
+  maxReplicas: 10
+  minReplicas: 2
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 50
+        periodSeconds: 150
+    scaleUp:
+      stabilizationWindowSeconds: 15
+      policies:
+      - type: Percent
+        value: 60
+        periodSeconds: 30
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 40
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 70
