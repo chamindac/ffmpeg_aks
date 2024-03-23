@@ -4,6 +4,22 @@ metadata:
   name: media
 
 ---
+# Config map enabling access to KV and App Config Service
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: media-configmap
+  namespace: media
+data:
+  config_dev-euw-001.json: |
+    {
+      "AppConfigEndpoint": "https://ch-video-dev-euw-001-appconfig-ac.azconfig.io",
+      "AppConfigLabel": "ch-video-dev-euw-001-rg-blue",
+      "SharedAppConfiglabel": "ch-video-dev-euw-001-rg",
+      "KeyVaultName": "ch-video-dev-euw-001-kv",
+      "AadTenantId": "efbad420-a8aa-4fcc-9e95-1d06435672d9",
+    }
+---
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -208,11 +224,11 @@ spec:
   minReplicas: 2
   behavior:
     scaleDown:
-      stabilizationWindowSeconds: 300
+      stabilizationWindowSeconds: 120
       policies:
       - type: Percent
         value: 50
-        periodSeconds: 150
+        periodSeconds: 60
     scaleUp:
       stabilizationWindowSeconds: 15
       policies:
@@ -225,7 +241,7 @@ spec:
       name: cpu
       target:
         type: Utilization
-        averageUtilization: 40
+        averageUtilization: 70
   - type: Resource
     resource:
       name: memory

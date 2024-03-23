@@ -1,0 +1,201 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: video-processor-eh
+  namespace: media
+  labels:
+    app: video-processor-eh
+spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 25%
+  minReadySeconds: 30
+  selector:
+    matchLabels:
+      service: video-processor-eh
+  template:
+    metadata:
+      labels:
+        app: video-processor-eh
+        service: video-processor-eh
+        azure.workload.identity/use: "true"
+    spec:
+      serviceAccountName: ch-video-wi-sa
+      nodeSelector:
+        "kubernetes.io/os": linux
+      priorityClassName: media-highest-priority-linux
+      #------------------------------------------------------
+      # setting pod DNS policies to enable faster DNS resolution
+      # https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy
+      dnsConfig:
+        options:
+          # use FQDN everywhere 
+          # any cluster local access from pods need full CNAME to resolve 
+          # short names will not resolve to internal cluster domains
+          - name: ndots
+            value: "2"
+          # dns resolver timeout and attempts
+          - name: timeout
+            value: "15"
+          - name: attempts
+            value: "3"
+          # use TCP to resolve DNS instad of using UDP (UDP is lossy and pods need to wait for timeout for lost packets)
+          - name: use-vc
+          # open new socket for retrying
+          - name: single-request-reopen
+      #------------------------------------------------------
+      volumes:
+        # # `name` here must match the name
+        # # specified in the volume mount
+        - name: demo-configmap-video-processor-eh-volume
+          configMap:
+            # `name` here must match the name
+            # specified in the ConfigMap's YAML
+            name: media-configmap
+        - name: media-data-volume
+          persistentVolumeClaim:
+            claimName: media-azurefile-video-processor # PersistentVolumeClaim name in aks_manifests\prerequisites\k8s.yaml
+      terminationGracePeriodSeconds: 90 # This must be set to a value that is greater than the preStop hook wait time.
+      containers:
+        - name: video-processor-eh
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sleep","10"]
+          image: chdemosharedacr.azurecr.io/media/chehubmediaservice:1.0
+          imagePullPolicy: Always
+          volumeMounts:
+            - mountPath: /etc/config
+              name: demo-configmap-video-processor-eh-volume
+            - mountPath: /media/data
+              name: media-data-volume
+          env:
+            - name: MEDIA_PATH
+              value: /media/data
+            - name: CH_VIDEO_WI_CONFIG
+              value: /etc/config/config_dev-euw-001.json
+          resources:
+                limits:
+                  memory: 4Gi # the memory limit equals to the request!
+                  # no cpu limit! this is excluded on purpose
+                requests:
+                  memory: 4Gi
+                  cpu: "2"
+
+# ---
+# apiVersion: keda.sh/v1alpha1
+# kind: ScaledObject
+# metadata:
+#   name: video-processor-eh-scaled-object
+#   namespace: media
+#   # annotations:
+#   #   scaledobject.keda.sh/transfer-hpa-ownership: "true"      # Optional. Use to transfer an existing HPA ownership to this ScaledObject
+#   #   autoscaling.keda.sh/paused-replicas: "0"                # Optional. Use to pause autoscaling of objects
+#   #   autoscaling.keda.sh/paused: "true"                      # Optional. Use to pause autoscaling of objects explicitly
+# spec:
+#   scaleTargetRef:
+#     apiVersion: apps/v1        # Optional. Default: apps/v1
+#     kind: Deployment           # Optional. Default: Deployment
+#     name: video-processor-eh      # Mandatory. Must be in the same namespace as the ScaledObject
+#     # envSourceContainerName: {container-name}                # Optional. Default: .spec.template.spec.containers[0]
+#   pollingInterval:  5                                      # Optional. Default: 30 seconds
+#   #cooldownPeriod: 300                                     # Optional. Default: 300 seconds ( Applies only if scaling to 0. We are not doing that)
+#   #idleReplicaCount: 0                                       # Optional. Default: ignored, must be less than minReplicaCount. Need to ignore running one replica always  https://github.com/kedacore/keda/issues/2314 
+#   minReplicaCount: 2                                       # Optional. Default: 0
+#   maxReplicaCount: 10                                     # Optional. Default: 100
+#   fallback:                                                 # Optional. Section to specify fallback options
+#     failureThreshold: 3                                     # Mandatory if fallback section is included
+#     replicas: 4                                             # Mandatory if fallback section is included
+#   advanced:                                                 # Optional. Section to specify advanced options
+#     restoreToOriginalReplicaCount: true               # Optional. Default: false
+#     horizontalPodAutoscalerConfig:                          # Optional. Section to specify HPA related options
+#       name: video-processor-eh-hpa                        # Optional. Default: keda-hpa-{scaled-object-name}
+#       # behavior:                                             # Optional. Use to modify HPA's scaling behavior
+#       #   scaleDown:
+#       #     stabilizationWindowSeconds: 120
+#       #     policies:
+#       #     - type: Percent
+#       #       value: 50
+#       #       periodSeconds: 60
+#       behavior:
+#         scaleDown:
+#           stabilizationWindowSeconds: 60
+#           policies:
+#           - type: Percent
+#             value: 50
+#             periodSeconds: 30
+#         scaleUp:
+#           stabilizationWindowSeconds: 15
+#           policies:
+#           - type: Percent
+#             value: 60
+#             periodSeconds: 10
+#       # metrics:
+#       # - type: Resource
+#       #   resource:
+#       #     name: cpu
+#       #     target:
+#       #       type: Utilization
+#       #       averageUtilization: 40
+#       # - type: Resource
+#       #   resource:
+#       #     name: memory
+#       #     target:
+#       #       type: Utilization
+#       #       averageUtilization: 70
+#   triggers:
+#     - type: azure-eventhub
+#       metadata:
+#         unprocessedEventThreshold: "2"
+#         activationUnprocessedEventThreshold: "0" 
+#         eventHubNamespace: ch-video-dev-euw-001-1-blue
+#         eventHubName: videopreview
+#         consumerGroup: videoprevieweventhandler
+#         storageAccountName: chvideodeveuw001ehnblue
+#         blobContainer: videoprevieweventhandler-videopreview
+#         checkpointStrategy: blobMetadata
+#       authenticationRef:
+#         name: demo-keda-auth
+
+# ---
+# # HPA for video-processor-eh
+# apiVersion: autoscaling/v2
+# kind: HorizontalPodAutoscaler
+# metadata:
+#   name: video-processor-eh-hpa
+#   namespace: media
+# spec:
+#   scaleTargetRef:
+#     apiVersion: apps/v1
+#     kind: Deployment
+#     name: video-processor-eh
+#   maxReplicas: 10
+#   minReplicas: 2
+#   behavior:
+#     scaleDown:
+#       stabilizationWindowSeconds: 120
+#       policies:
+#       - type: Percent
+#         value: 50
+#         periodSeconds: 60
+#     scaleUp:
+#       stabilizationWindowSeconds: 15
+#       policies:
+#       - type: Percent
+#         value: 60
+#         periodSeconds: 30
+#   metrics:
+#   - type: Resource
+#     resource:
+#       name: cpu
+#       target:
+#         type: Utilization
+#         averageUtilization: 70
+#   - type: Resource
+#     resource:
+#       name: memory
+#       target:
+#         type: Utilization
+#         averageUtilization: 70
