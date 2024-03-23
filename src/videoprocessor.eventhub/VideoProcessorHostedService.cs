@@ -135,8 +135,14 @@ internal sealed class VideoProcessorHostedService : BackgroundService
     private Task VideoTranscordEventErrorHandlerAsync(ProcessErrorEventArgs eventArgs)
     {
         // Write details about the error to the console window
-        _logger.LogInformation($"\tPartition '{eventArgs.PartitionId}': an unhandled exception was encountered. This was not expected to happen.");
+        _logger.LogInformation($"\tPartition '{eventArgs.PartitionId}': an unhandled exception was encountered in operation {eventArgs.Operation}. This was not expected to happen.");
         _logger.LogInformation(eventArgs.Exception.Message);
+        Exception? innerOne = eventArgs.Exception.InnerException;
+        while (innerOne is not null)
+        {
+            _logger.LogInformation(innerOne.Message);
+            innerOne = eventArgs.Exception.InnerException;
+        }
         return Task.CompletedTask;
     }
 
