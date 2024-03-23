@@ -57,14 +57,14 @@ spec:
         - name: media-data-volume
           persistentVolumeClaim:
             claimName: media-azurefile-video-processor # PersistentVolumeClaim name in aks_manifests\prerequisites\k8s.yaml
-      terminationGracePeriodSeconds: 90 # This must be set to a value that is greater than the preStop hook wait time.
+      terminationGracePeriodSeconds: 15000 # This must be set to a value that is greater than the preStop hook wait time.
       containers:
         - name: video-processor-eh
           lifecycle:
             preStop:
               exec:
                 command: ["sleep","10"]
-          image: chdemosharedacr.azurecr.io/media/chehubmediaservice:1.0
+          image: chdemosharedacr.azurecr.io/media/chehubmediaservice:1.2
           imagePullPolicy: Always
           volumeMounts:
             - mountPath: /etc/config

@@ -20,6 +20,7 @@
   <ItemGroup>
     <PackageReference Include="Azure.Messaging.EventHubs.Processor" Version="5.11.1" />
     <PackageReference Include="Azure.Storage.Blobs" Version="12.19.1" />
+    <PackageReference Include="Xabe.FFmpeg" Version="5.2.6" />
   </ItemGroup>
 
   <ItemGroup>
