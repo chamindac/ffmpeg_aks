@@ -137,7 +137,7 @@ namespace videoprocessor.eventhub.Services
                         .ExtractEveryNthFrame(frameExctractionRate, outputFileNameBuilder)
                         .Start();
 
-                    _logger.LogInformation($"Transcoding {transcodeRequest.AssetId} as {transcodeRequest.OutFilePrefix}... Transcoding {transcodeRequest.AssetId} as {transcodeRequest.OutFilePrefix}... Video covertion duration is: {resultVideo.Duration}");
+                    _logger.LogInformation($"Transcoding {transcodeRequest.AssetId} as {transcodeRequest.OutFilePrefix}... Video covertion duration is: {resultVideo.Duration}");
                     _logger.LogInformation($"Transcoding {transcodeRequest.AssetId} as {transcodeRequest.OutFilePrefix}... Image covertion duration is: {resultImages.Duration}");
                     _logger.LogInformation($"Transcoding {transcodeRequest.AssetId} as {transcodeRequest.OutFilePrefix}... Process duration is: {resultImages.Duration.Add(resultVideo.Duration)}");
 
