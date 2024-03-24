@@ -64,7 +64,7 @@ spec:
             preStop:
               exec:
                 command: ["sleep","10"]
-          image: chdemosharedacr.azurecr.io/media/chehubmediaservice:1.2
+          image: chdemosharedacr.azurecr.io/media/chehubmediaservice:1.4
           imagePullPolicy: Always
           volumeMounts:
             - mountPath: /etc/config
@@ -192,7 +192,7 @@ spec:
 #       name: cpu
 #       target:
 #         type: Utilization
-#         averageUtilization: 70
+#         averageUtilization: 40
 #   - type: Resource
 #     resource:
 #       name: memory

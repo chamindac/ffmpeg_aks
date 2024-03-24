@@ -106,9 +106,10 @@ internal sealed class VideoProcessorHostedService : BackgroundService
 
     private async Task VideoTranscordEventHandlerAsync(ProcessEventArgs eventArgs)
     {
-        if (eventArgs.CancellationToken.IsCancellationRequested
-            || _videoTranscorder.InProgressLargeFileCount > 0
-            || _processingEventCount >= MaxParallelEventLimit)
+        //if (eventArgs.CancellationToken.IsCancellationRequested
+        //    || _videoTranscorder.InProgressLargeFileCount > 0
+        //    || _processingEventCount >= MaxParallelEventLimit)
+        if (eventArgs.CancellationToken.IsCancellationRequested)
         {
             _logger.LogInformation($"Hosted service rejecting an event. Cancellation token is {eventArgs.CancellationToken.IsCancellationRequested}, in progress events {_processingEventCount} out of max parallel {MaxParallelEventLimit}, in progress large files {_videoTranscorder.InProgressLargeFileCount}.");
             return;

@@ -72,8 +72,8 @@ namespace videoprocessor.eventhub.Services
                         transcodeRequest.OriginalAssetBlobName);
 
                     downloadTimer.Stop();
-                    _logger.LogInformation($"Media path is: {mediaPath}");
-                    _logger.LogInformation($"Video asset path is: {assetPath}");
+                    _logger.LogInformation($"Transcoding {transcodeRequest.AssetId} as {transcodeRequest.OutFilePrefix}... Media path is: {mediaPath}");
+                    _logger.LogInformation($"Transcoding {transcodeRequest.AssetId} as {transcodeRequest.OutFilePrefix}... Video asset path is: {assetPath}");
 
                     // Obtain video file size in MBs and duration
                     FileInfo assetInfo = new FileInfo(assetPath);
@@ -86,10 +86,10 @@ namespace videoprocessor.eventhub.Services
                     }
 
                     string outputFolderPath = Path.Combine(assetFolderPath, _outputFolderName);
-                    _logger.LogInformation($"Video file size is: {assetSize} MBs");
+                    _logger.LogInformation($"Transcoding {transcodeRequest.AssetId} as {transcodeRequest.OutFilePrefix}... Video file size is: {assetSize} MBs");
 
                     IMediaInfo info = await FFmpeg.GetMediaInfo(assetPath);
-                    _logger.LogInformation($"Video duration is: {info.Duration}");
+                    _logger.LogInformation($"Transcoding {transcodeRequest.AssetId} as {transcodeRequest.OutFilePrefix}... Video duration is: {info.Duration}");
 
                     // Create output folder to keep generated files for uploading to target
                     Directory.CreateDirectory(outputFolderPath);
@@ -129,7 +129,7 @@ namespace videoprocessor.eventhub.Services
                     // Calculate image extraction frame rate, to extract 10 images from the video
                     int frameExctractionRate = (int)(videoStreamForImages.Framerate * videoStreamForImages.Duration.TotalSeconds) / 9; // Divide by 10 gives 11 images
 
-                    _logger.LogInformation($"Frame extraction rate is:{frameExctractionRate}");
+                    _logger.LogInformation($"Transcoding {transcodeRequest.AssetId} as {transcodeRequest.OutFilePrefix}... Frame extraction rate is:{frameExctractionRate}");
 
                     // Extract images
                     IConversionResult resultImages = await FFmpeg.Conversions.New()
@@ -137,9 +137,9 @@ namespace videoprocessor.eventhub.Services
                         .ExtractEveryNthFrame(frameExctractionRate, outputFileNameBuilder)
                         .Start();
 
-                    _logger.LogInformation($"Video covertion duration is: {resultVideo.Duration}");
-                    _logger.LogInformation($"Image covertion duration is: {resultImages.Duration}");
-                    _logger.LogInformation($"Process duration is: {resultImages.Duration.Add(resultVideo.Duration)}");
+                    _logger.LogInformation($"Transcoding {transcodeRequest.AssetId} as {transcodeRequest.OutFilePrefix}... Transcoding {transcodeRequest.AssetId} as {transcodeRequest.OutFilePrefix}... Video covertion duration is: {resultVideo.Duration}");
+                    _logger.LogInformation($"Transcoding {transcodeRequest.AssetId} as {transcodeRequest.OutFilePrefix}... Image covertion duration is: {resultImages.Duration}");
+                    _logger.LogInformation($"Transcoding {transcodeRequest.AssetId} as {transcodeRequest.OutFilePrefix}... Process duration is: {resultImages.Duration.Add(resultVideo.Duration)}");
 
                     // Upload generated 720p video and exxtracted images to target blob storage
                     Stopwatch uploadTimer = Stopwatch.StartNew();
@@ -150,7 +150,7 @@ namespace videoprocessor.eventhub.Services
 
                     await UploadGeneratedAssets(destinationContainer, outputFolderPath);
                     uploadTimer.Stop();
-                    _logger.LogInformation($"File upload duration is:{uploadTimer.Elapsed.TotalSeconds} seconds");
+                    _logger.LogInformation($"Transcoding {transcodeRequest.AssetId} as {transcodeRequest.OutFilePrefix}... File upload duration is:{uploadTimer.Elapsed.TotalSeconds} seconds");
 
                     // Generate process time info file
                     string processTimeInfoFileName = "processtime.txt";
@@ -171,6 +171,7 @@ namespace videoprocessor.eventhub.Services
                 }
                 catch (Exception ex)
                 {
+                    _logger.LogInformation($"Transcoding failed {transcodeRequest.AssetId} as {transcodeRequest.OutFilePrefix}...");
                     _logger.LogInformation(ex.Message);
                 }
                 finally
