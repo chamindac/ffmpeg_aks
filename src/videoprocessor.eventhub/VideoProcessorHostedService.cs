@@ -16,7 +16,6 @@ internal sealed class VideoProcessorHostedService : BackgroundService
 {
     private const string EventHubName = "videopreview";
     private const string EventHubConsumer = "videoprevieweventhandler";
-    private const int MaxParallelEventLimit = 10;
     //private const int TerminationGracePeriodSeconds = 60;
 
     private readonly ILogger<VideoProcessorHostedService> _logger;
@@ -106,22 +105,19 @@ internal sealed class VideoProcessorHostedService : BackgroundService
 
     private async Task VideoTranscordEventHandlerAsync(ProcessEventArgs eventArgs)
     {
-        if (eventArgs.CancellationToken.IsCancellationRequested
-            || _videoTranscorder.InProgressLargeFileCount > 0
-            || _processingEventCount >= MaxParallelEventLimit)
+        if (eventArgs.CancellationToken.IsCancellationRequested)
         {
-            _logger.LogInformation($"Hosted service rejecting an event. Cancellation token is {eventArgs.CancellationToken.IsCancellationRequested}, in progress events {_processingEventCount} out of max parallel {MaxParallelEventLimit}, in progress large files {_videoTranscorder.InProgressLargeFileCount}.");
+            _logger.LogInformation($"Hosted service rejecting an event. Cancellation token is {eventArgs.CancellationToken.IsCancellationRequested}, in progress events {_processingEventCount}.");
             return;
         }
 
         if (eventArgs.HasEvent)
         {
-            _logger.LogInformation($"Hosted service intiating an event process. Cancellation token is {eventArgs.CancellationToken.IsCancellationRequested}, in progress events {_processingEventCount} out of max parallel {MaxParallelEventLimit}, in progress large files {_videoTranscorder.InProgressLargeFileCount}.");
             await eventArgs.UpdateCheckpointAsync(); // update checkpoint so we mark the message is processed
-            _logger.LogInformation("Update checkpoint.");
+            _logger.LogInformation("Updated checkpoint.");
 
             _processingEventCount++;
-            _logger.LogInformation($"Hosted service processing an event... Cancellation token is {eventArgs.CancellationToken.IsCancellationRequested}, in progress events {_processingEventCount} out of max parallel {MaxParallelEventLimit}, in progress large files {_videoTranscorder.InProgressLargeFileCount}.");
+            _logger.LogInformation($"Hosted service processing an event... Cancellation token is {eventArgs.CancellationToken.IsCancellationRequested}, in progress events {_processingEventCount}.");
 
             // Write the body of the event to the console window
             _logger.LogInformation("\tReceived event: {0}", Encoding.UTF8.GetString(eventArgs.Data.Body.ToArray()));

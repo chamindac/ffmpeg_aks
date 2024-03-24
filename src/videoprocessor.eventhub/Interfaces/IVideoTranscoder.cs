@@ -10,7 +10,6 @@ namespace videoprocessor.eventhub.Interfaces
 {
     internal interface IVideoTranscoder
     {
-        int InProgressLargeFileCount { get; set; }
         Task TranscodeAsync(TranscodeRequest transcodeMessage);
     }
 }
