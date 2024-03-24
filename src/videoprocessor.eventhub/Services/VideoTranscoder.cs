@@ -32,6 +32,13 @@ namespace videoprocessor.eventhub.Services
             _logger = logger;
             _trascoderInstanceMediaPath = Path.Combine(Environment.GetEnvironmentVariable("MEDIA_PATH"), Guid.NewGuid().ToString());
         }
+        public void Dispose()
+        {
+            if (Directory.Exists(_trascoderInstanceMediaPath))
+            {
+                Directory.Delete(_trascoderInstanceMediaPath, true);
+            }
+        }
 
         public async Task TranscodeAsync(TranscodeRequest transcodeRequest)
         {

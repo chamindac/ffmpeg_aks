@@ -64,7 +64,7 @@ spec:
             preStop:
               exec:
                 command: ["sleep","10"]
-          image: chdemosharedacr.azurecr.io/media/chehubmediaservice:1.7
+          image: chdemosharedacr.azurecr.io/media/chehubmediaservice:1.8
           imagePullPolicy: Always
           volumeMounts:
             - mountPath: /etc/config

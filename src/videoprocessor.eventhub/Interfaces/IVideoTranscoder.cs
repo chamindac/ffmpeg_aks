@@ -8,7 +8,7 @@ using videoprocessor.eventhub.Models;
 
 namespace videoprocessor.eventhub.Interfaces
 {
-    internal interface IVideoTranscoder
+    internal interface IVideoTranscoder : IDisposable
     {
         Task TranscodeAsync(TranscodeRequest transcodeMessage);
     }
