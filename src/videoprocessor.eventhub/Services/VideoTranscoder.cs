@@ -20,18 +20,21 @@ namespace videoprocessor.eventhub.Services
 {
     internal class VideoTranscoder : IVideoTranscoder
     {
-        const string SourceStorageName = "cheuw001assetsstcool";
-        const string DestinationStorageName = "cheuw001assetssthot";
-        //const string QueueStorageName = "chvideodeveuw001queuest";
-        //const string ServieBusNamespace = "ch-video-dev-euw-001-sbus-blue.servicebus.windows.net"; // Based on blue green this should come from app config
-        //const string QueueName = "dotnetvideoqueue";
-        const string OutputFolderName = "generated";
+        //public int InProgressLargeFileCount;
+
+        private const string _sourceStorageName = "cheuw001assetsstcool";
+        private const string _destinationStorageName = "cheuw001assetssthot";
+        private const string _outputFolderName = "generated";
+        private const long _smallFileSizeLimit = 512;
 
         private readonly ILogger<VideoTranscoder> _logger;
+
+        public int InProgressLargeFileCount { get; set; }
 
         public VideoTranscoder(ILogger<VideoTranscoder> logger)
         {
             _logger = logger;
+            InProgressLargeFileCount = 0;
         }
 
         public async Task TranscodeAsync(TranscodeRequest transcodeRequest)
@@ -39,7 +42,7 @@ namespace videoprocessor.eventhub.Services
             //_logger.LogInformation($"Transcoding {transcodeRequest.AssetId} as {transcodeRequest.OutFilePrefix}...");
             //// TODO: This is fake implemtation to test scaling kindly ignore for now
             //int elapsedSeconds = 0;
-            //while (elapsedSeconds < 60) // TODO: fix here
+            //while (elapsedSeconds < 300) // TODO: fix here
             //{
             //    await Task.Delay(TimeSpan.FromSeconds(10));
             //    elapsedSeconds += 10;
@@ -49,6 +52,7 @@ namespace videoprocessor.eventhub.Services
 
             // Use mounted volume path for container
             string? mediaPath = Environment.GetEnvironmentVariable("MEDIA_PATH");
+            bool isLargeFile = false;
 
             if (mediaPath is not null)
             {
@@ -74,7 +78,14 @@ namespace videoprocessor.eventhub.Services
                     // Obtain video file size in MBs and duration
                     FileInfo assetInfo = new FileInfo(assetPath);
                     long assetSize = assetInfo.Length / (1024 * 1024);
-                    string outputFolderPath = Path.Combine(assetFolderPath, OutputFolderName);
+
+                    if (assetSize > _smallFileSizeLimit)
+                    {
+                        InProgressLargeFileCount++;
+                        isLargeFile = true;
+                    }
+
+                    string outputFolderPath = Path.Combine(assetFolderPath, _outputFolderName);
                     _logger.LogInformation($"Video file size is: {assetSize} MBs");
 
                     IMediaInfo info = await FFmpeg.GetMediaInfo(assetPath);
@@ -132,7 +143,7 @@ namespace videoprocessor.eventhub.Services
 
                     // Upload generated 720p video and exxtracted images to target blob storage
                     Stopwatch uploadTimer = Stopwatch.StartNew();
-                    BlobServiceClient destinationBlobServiceClient = GetBlobServiceClient(DestinationStorageName);
+                    BlobServiceClient destinationBlobServiceClient = GetBlobServiceClient(_destinationStorageName);
 
                     BlobContainerClient destinationContainer = await CreateDestinationContainer(destinationBlobServiceClient,
                         string.Concat("dotnet-", transcodeRequest.AssetId));
@@ -164,6 +175,11 @@ namespace videoprocessor.eventhub.Services
                 }
                 finally
                 {
+                    if (isLargeFile)
+                    {
+                        InProgressLargeFileCount--;
+                    }
+
                     // Clean up downloaded and generated files
                     if (Directory.Exists(assetFolderPath))
                     {
@@ -245,7 +261,7 @@ namespace videoprocessor.eventhub.Services
             string originalAssetBlobName)
         {
 
-            BlobServiceClient blobServiceClient = GetBlobServiceClient(SourceStorageName);
+            BlobServiceClient blobServiceClient = GetBlobServiceClient(_sourceStorageName);
             BlobClient blobClient = blobServiceClient
                     .GetBlobContainerClient(assetCotainer)
                     .GetBlobClient($"{assetId}/{originalAssetBlobName}");

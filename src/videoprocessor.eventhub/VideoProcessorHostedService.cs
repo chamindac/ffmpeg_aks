@@ -16,6 +16,7 @@ internal sealed class VideoProcessorHostedService : BackgroundService
 {
     private const string EventHubName = "videopreview";
     private const string EventHubConsumer = "videoprevieweventhandler";
+    private const int MaxParallelEventLimit = 10;
     //private const int TerminationGracePeriodSeconds = 60;
 
     private readonly ILogger<VideoProcessorHostedService> _logger;
@@ -34,7 +35,7 @@ internal sealed class VideoProcessorHostedService : BackgroundService
     {
         _logger = logger;
         _applicationLifetime = applicationLifetime;
-         _videoTranscorder = videoTranscoder;
+        _videoTranscorder = videoTranscoder;
         _cancellationTokenSource = new CancellationTokenSource();
 
         string eventhubNamespace = configuration["EventHubNamespaceName-1"];
@@ -105,31 +106,41 @@ internal sealed class VideoProcessorHostedService : BackgroundService
 
     private async Task VideoTranscordEventHandlerAsync(ProcessEventArgs eventArgs)
     {
-        if (eventArgs.CancellationToken.IsCancellationRequested)
+        if (eventArgs.CancellationToken.IsCancellationRequested
+            || _videoTranscorder.InProgressLargeFileCount > 0
+            || _processingEventCount >= MaxParallelEventLimit)
         {
+            _logger.LogInformation($"Hosted service rejecting an event. Cancellation token is {eventArgs.CancellationToken.IsCancellationRequested}, in progress events {_processingEventCount} out of max parallel {MaxParallelEventLimit}, in progress large files {_videoTranscorder.InProgressLargeFileCount}.");
             return;
         }
 
-        _processingEventCount++;
-        _logger.LogInformation("Hosted service processing an event...");
-
-        // Write the body of the event to the console window
-        await eventArgs.UpdateCheckpointAsync(); // update checkpoint so we mark the message is processed
-        _logger.LogInformation("\tReceived event: {0}", Encoding.UTF8.GetString(eventArgs.Data.Body.ToArray()));
-        _logger.LogInformation("Processing...");
-
-        await _videoTranscorder.TranscodeAsync(
-            eventArgs.Data.EventBody.ToObjectFromJson<TranscodeRequest>(new JsonSerializerOptions()
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-            }));
-
-        if (_processingEventCount > 0)
+        if (eventArgs.HasEvent)
         {
-            _processingEventCount--;
+            _logger.LogInformation($"Hosted service intiating an event process. Cancellation token is {eventArgs.CancellationToken.IsCancellationRequested}, in progress events {_processingEventCount} out of max parallel {MaxParallelEventLimit}, in progress large files {_videoTranscorder.InProgressLargeFileCount}.");
+            await eventArgs.UpdateCheckpointAsync(); // update checkpoint so we mark the message is processed
+            _logger.LogInformation("Update checkpoint.");
+
+            _processingEventCount++;
+            _logger.LogInformation($"Hosted service processing an event... Cancellation token is {eventArgs.CancellationToken.IsCancellationRequested}, in progress events {_processingEventCount} out of max parallel {MaxParallelEventLimit}, in progress large files {_videoTranscorder.InProgressLargeFileCount}.");
+
+            // Write the body of the event to the console window
+            _logger.LogInformation("\tReceived event: {0}", Encoding.UTF8.GetString(eventArgs.Data.Body.ToArray()));
+            _logger.LogInformation("Processing...");
+
+            await _videoTranscorder.TranscodeAsync(
+                eventArgs.Data.EventBody.ToObjectFromJson<TranscodeRequest>(new JsonSerializerOptions()
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                }));
+
+            if (_processingEventCount > 0)
+            {
+                _processingEventCount--;
+            }
+
+            //_ = _cancellationTokenSource.CancelAsync();
+            //_ = JobTerminationHandlerAsync();
         }
-        //_ = _cancellationTokenSource.CancelAsync();
-        //_ = JobTerminationHandlerAsync();
     }
 
     private Task VideoTranscordEventErrorHandlerAsync(ProcessErrorEventArgs eventArgs)
