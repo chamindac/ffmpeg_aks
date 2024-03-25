@@ -194,7 +194,9 @@ namespace videoprocessor.eventhub.Services
                     {
                         // Set the maximum number of workers that 
                         // may be used in a parallel transfer.
-                        MaximumConcurrency = 8,
+                        MaximumConcurrency = Environment.ProcessorCount * 8,
+
+                        InitialTransferSize = 50 * 1024 * 1024,
 
                         // Set the maximum length of a transfer to 50MB.
                         MaximumTransferSize = 50 * 1024 * 1024
@@ -262,13 +264,12 @@ namespace videoprocessor.eventhub.Services
             var transferOptions = new StorageTransferOptions
             {
                 // Set the maximum number of parallel transfer workers
-                MaximumConcurrency = 5,
+                MaximumConcurrency = Environment.ProcessorCount * 8,
 
-                // Set the initial transfer length to 8 MiB
-                InitialTransferSize = 8 * 1024 * 1024,
+                InitialTransferSize = 50 * 1024 * 1024,
 
-                // Set the maximum length of a transfer to 4 MiB
-                MaximumTransferSize = 4 * 1024 * 1024
+                // Set the maximum length of a transfer to 50MB.
+                MaximumTransferSize = 50 * 1024 * 1024
             };
 
             BlobDownloadToOptions downloadOptions = new BlobDownloadToOptions()
