@@ -160,26 +160,26 @@ internal class Program
                     ]
                 }
             """,
-            //"""
-            //    {
-            //        "assetContainerName": "originals-de1885b94150-d6f6b9f9-f2eb-42cf-96c5-fe0be098fef3",
-            //        "assetId": "40f88882-73fd-4785-b662-9c87c2876814",
-            //        "originalAssetBlobName": "original",
-            //        "sourceStorageAccount": "cheuw001assetsstcool",
-            //        "destinationStorageAccount": "cheuw001assetssthot",
-            //        "outFilePrefix": "strangerthings",
-            //        "commandArgs": [
-            //            {
-            //            "outFileOptions": "-vf fps=1/420",
-            //            "outFileName": "strangerthings_%04d.png"
-            //            },
-            //            {
-            //            "outFileOptions": "-vcodec libx264 -crf 28 -preset ultrafast -c:a copy -s 1280x720",
-            //            "outFileName": "strangerthings_720p.mp4"
-            //            }
-            //        ]
-            //    }
-            //""",
+            """
+                {
+                    "assetContainerName": "originals-de1885b94150-d6f6b9f9-f2eb-42cf-96c5-fe0be098fef3",
+                    "assetId": "40f88882-73fd-4785-b662-9c87c2876814",
+                    "originalAssetBlobName": "original",
+                    "sourceStorageAccount": "cheuw001assetsstcool",
+                    "destinationStorageAccount": "cheuw001assetssthot",
+                    "outFilePrefix": "strangerthings",
+                    "commandArgs": [
+                        {
+                        "outFileOptions": "-vf fps=1/420",
+                        "outFileName": "strangerthings_%04d.png"
+                        },
+                        {
+                        "outFileOptions": "-vcodec libx264 -crf 28 -preset ultrafast -c:a copy -s 1280x720",
+                        "outFileName": "strangerthings_720p.mp4"
+                        }
+                    ]
+                }
+            """,
             """
                 {
                     "assetContainerName": "originals-de1885b94150-d6f6b9f9-f2eb-42cf-96c5-fe0be098fef3",
