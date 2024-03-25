@@ -99,7 +99,7 @@ internal sealed class VideoProcessorHostedService : BackgroundService
         _eventProcessorClient.ProcessErrorAsync -= VideoTranscordEventErrorHandlerAsync;
         _cancellationTokenSource.Dispose();
         _videoTranscorder.Dispose();
-        _logger.LogInformation("Scaled job terminated.");
+        _logger.LogInformation("Hosted service terminated.");
 
         await base.StopAsync(cancellationToken);
     }
