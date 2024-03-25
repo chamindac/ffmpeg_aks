@@ -88,10 +88,10 @@ internal sealed class VideoProcessorHostedService : BackgroundService
     {
         await _cancellationTokenSource.CancelAsync();
         _logger.LogInformation($"Hosted service termination intiated, waiting for {_processingEventCount} processing events...");
-
         // Event processor client will wait, for current processing events to be completed, before stopping.
         // No new events will be recieved, since stop is triggered.
         // StopProcessingAsync is equivalent to dispose (there is no IDisposable implmentation in EventProcessorClient. More information: https://learn.microsoft.com/en-us/dotnet/api/azure.messaging.eventhubs.eventprocessorclient?view=azure-dotnet#remarks).
+
         await _eventProcessorClient.StopProcessingAsync(cancellationToken);
 
         _logger.LogInformation($"Processing events count is {_processingEventCount}. Hosted service terminating...");
@@ -124,24 +124,19 @@ internal sealed class VideoProcessorHostedService : BackgroundService
             _logger.LogInformation("\tReceived event: {0}", Encoding.UTF8.GetString(eventArgs.Data.Body.ToArray()));
             _logger.LogInformation("Processing...");
 
-            try
-            {
-                await _videoTranscorder.TranscodeAsync(
+            await _videoTranscorder.TranscodeAsync(
                 eventArgs.Data.EventBody.ToObjectFromJson<TranscodeRequest>(new JsonSerializerOptions()
                 {
                     PropertyNamingPolicy = JsonNamingPolicy.CamelCase
                 }));
-            }
-            finally
-            {
-                if (_processingEventCount > 0)
-                {
-                    _processingEventCount--;
-                }
 
-                //_ = _cancellationTokenSource.CancelAsync();
-                //_ = JobTerminationHandlerAsync();
+            if (_processingEventCount > 0)
+            {
+                _processingEventCount--;
             }
+
+            //_ = _cancellationTokenSource.CancelAsync();
+            //_ = JobTerminationHandlerAsync();
         }
     }
 

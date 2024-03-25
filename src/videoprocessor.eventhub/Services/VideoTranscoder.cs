@@ -262,7 +262,7 @@ namespace videoprocessor.eventhub.Services
             var transferOptions = new StorageTransferOptions
             {
                 // Set the maximum number of parallel transfer workers
-                MaximumConcurrency = 8,
+                MaximumConcurrency = 5,
 
                 // Set the initial transfer length to 8 MiB
                 InitialTransferSize = 8 * 1024 * 1024,
