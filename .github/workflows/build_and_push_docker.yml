@@ -1,15 +1,8 @@
-on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-
-name: Buid_and_Push_Docker
-
+name: hello-world
+on: push
 jobs:
-  build:
+  my-job:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - name: Build the Docker image
-      run: docker build -t my-docker-image:latest -f ./src/videoprocessor.eventhub/Dockerfile .
+      - name: my-step
+        run: echo "Hello World!"
