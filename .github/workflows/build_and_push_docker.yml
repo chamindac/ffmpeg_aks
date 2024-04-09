@@ -1,15 +1,10 @@
-on: 
-  push:
-  workflow_dispatch:
+on: push
 
-name: build_and_push_docker_sample
+name: hello-world
 
 jobs:
-  build:
+  my-job:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Build the Docker image
-      run: docker build -t my-docker-image:latest -f ./src/videoprocessor.eventhub/Dockerfile . 
-    # - name: Push the Docker image
-    #   run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/my-docker-image:latest
+      - name: my-step
+        run: echo "Hello World!"
