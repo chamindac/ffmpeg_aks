@@ -2,6 +2,8 @@ on:
   push:
   workflow_dispatch:
 
+name: build_and_push_docker_sample
+
 jobs:
   build:
     runs-on: ubuntu-latest
