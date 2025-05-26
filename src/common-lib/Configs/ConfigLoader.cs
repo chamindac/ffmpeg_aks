@@ -9,7 +9,7 @@ namespace common.lib.Configs
     {
         public static IConfigurationRoot LoadConfiguration(IConfigurationBuilder configBuilder)
         {
-            configBuilder.AddJsonFile(Environment.GetEnvironmentVariable("CH_VIDEO_WI_CONFIG"));
+            configBuilder.AddJsonFile(Environment.GetEnvironmentVariable("CH_VIDEO_WI_CONFIG-av"));
 
             var config = configBuilder.Build();
 
